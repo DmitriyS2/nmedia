@@ -10,7 +10,8 @@
         android:id="@+id/avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="TODO"
+        android:contentDescription="@string/avatar_Desc"
+        android:src="@drawable/ic_netology_48dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@sample/posts_avatars" />
@@ -28,6 +29,7 @@
         app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
+
         tools:text="@sample/posts.json/data/author" />
 
 
@@ -50,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/common_spacing"
         android:background="@android:color/transparent"
-        android:contentDescription="TODO"
+        android:contentDescription="@string/menu_Desc"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/more_vert_24" />
@@ -73,47 +75,51 @@
         app:layout_constraintTop_toBottomOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
-    <ImageView
-        android:id="@+id/picture_like"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_spacing"
-        android:contentDescription="TODO"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/content"
-        tools:src="@drawable/favorite_border_24" />
-
-    <TextView
+    <ImageButton
         android:id="@+id/like"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/small_spacing"
-        app:layout_constraintBottom_toBottomOf="@id/picture_like"
-        app:layout_constraintStart_toEndOf="@id/picture_like"
-        app:layout_constraintTop_toTopOf="@id/picture_like"
-        tools:text="@sample/posts.json/data/like" />
-
-    <ImageView
-        android:id="@+id/picture_share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_spacing"
-        android:contentDescription="TODO"
-        app:layout_constraintStart_toEndOf="@id/like"
-        app:layout_constraintTop_toTopOf="@id/picture_like"
-        tools:src="@drawable/share_24" />
+        android:background="@android:color/transparent"
+        android:layout_marginTop="@dimen/common_spacing"
+        android:contentDescription="@string/like_Desc"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/content"
+        android:src="@drawable/favorite_border_24"
+        />
 
     <TextView
+        android:id="@+id/likeCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/small_spacing"
+        app:layout_constraintBottom_toBottomOf="@id/like"
+        app:layout_constraintStart_toEndOf="@id/like"
+        app:layout_constraintTop_toTopOf="@id/like"
+        />
+
+    <ImageButton
         android:id="@+id/share"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/small_spacing"
-        app:layout_constraintStart_toEndOf="@id/picture_share"
+        android:background="@android:color/transparent"
+        android:layout_marginStart="50dp"
+        android:contentDescription="@string/share_Desc"
+        app:layout_constraintStart_toEndOf="@id/like"
         app:layout_constraintTop_toTopOf="@id/like"
-        tools:text="@sample/posts.json/data/share" />
+        android:src="@drawable/share_24"
+        />
 
     <TextView
-        android:id="@+id/watch"
+        android:id="@+id/shareCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/small_spacing"
+        app:layout_constraintStart_toEndOf="@id/share"
+        app:layout_constraintTop_toTopOf="@id/like"
+        />
+
+    <TextView
+        android:id="@+id/watchCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/small_spacing"
@@ -122,13 +128,14 @@
         tools:text="@sample/posts.json/data/watch" />
 
     <ImageView
-        android:id="@+id/picture_watch"
+        android:id="@+id/watch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/small_spacing"
-        app:layout_constraintEnd_toStartOf="@id/watch"
-        app:layout_constraintTop_toTopOf="@id/picture_like"
-        tools:src="@drawable/remove_red_eye_24" />
+        app:layout_constraintEnd_toStartOf="@id/watchCount"
+        app:layout_constraintTop_toTopOf="@id/like"
+        android:src="@drawable/remove_red_eye_24"
+        android:contentDescription="@string/watch_Desc" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

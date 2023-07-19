@@ -2,4 +2,9 @@
 <resources>
     <string name="app_name">НМедиа</string>
     <string name="nmedia">НМедиа!</string>
+    <string name="avatar_Desc">Аватар</string>
+    <string name="menu_Desc">Меню</string>
+    <string name="like_Desc">Лайк</string>
+    <string name="share_Desc">Поделиться</string>
+    <string name="watch_Desc">Просмотры</string>
 </resources>
