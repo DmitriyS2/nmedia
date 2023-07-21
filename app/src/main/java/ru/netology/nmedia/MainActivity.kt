@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                 watchCount.text = createCount(post.watch)
                 like?.setImageResource(if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.favorite_border_24)
             }
-        }git 
+        }
 
         binding.like.setOnClickListener {
             viewModel.like()
