@@ -6,4 +6,7 @@
     <string name="like_Desc">like</string>
     <string name="share_Desc">share</string>
     <string name="watch_Desc">watch</string>
+    <string name="remove">Remove</string>
+    <string name="post_text">Post text</string>
+    <string name="edit">Edit</string>
 </resources>

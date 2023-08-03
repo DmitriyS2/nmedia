@@ -7,4 +7,7 @@
     <string name="like_Desc">Лайк</string>
     <string name="share_Desc">Поделиться</string>
     <string name="watch_Desc">Просмотры</string>
+    <string name="remove">Удалить</string>
+    <string name="post_text">Текст</string>
+    <string name="edit">Редактировать</string>
 </resources>
