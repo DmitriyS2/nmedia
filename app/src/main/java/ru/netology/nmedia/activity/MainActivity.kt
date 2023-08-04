@@ -12,6 +12,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.focusAndShowKeyboard
 import ru.netology.nmedia.viewmodel.PostViewModel
+import ru.netology.nmedia.viewmodel.getEmpty
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity() {
             binding.groupEdit.visibility = View.GONE
             binding.content.clearFocus()
             AndroidUtils.hideKeyboard(it)
+            viewModel.edit(getEmpty())
         }
     }
 }

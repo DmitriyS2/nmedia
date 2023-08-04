@@ -16,6 +16,10 @@ private val empty = Post(
     shares = 0,
     watch = 0
 )
+fun getEmpty():Post{
+    return empty
+}
+
 
 class PostViewModel : ViewModel() {
     private val repository: PostRepository = PostRepositoryInMemoryImpl()
