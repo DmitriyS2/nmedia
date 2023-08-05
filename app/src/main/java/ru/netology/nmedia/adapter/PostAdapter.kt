@@ -15,7 +15,6 @@ interface OnInteractionListener {
     fun like(post: Post)
     fun share(post: Post)
     fun remove(post: Post)
-
     fun edit(post: Post)
 }
 
@@ -54,19 +53,21 @@ class PostViewHolder(
                 onInteractionListener.share(post)
             }
 
-            menu.setOnClickListener{
-                PopupMenu(it.context,it).apply {
+            menu.setOnClickListener {
+                PopupMenu(it.context, it).apply {
                     inflate(R.menu.menu_options)
                     setOnMenuItemClickListener { item ->
-                        when(item.itemId) {
+                        when (item.itemId) {
                             R.id.remove -> {
                                 onInteractionListener.remove(post)
                                 true
                             }
+
                             R.id.edit -> {
                                 onInteractionListener.edit(post)
                                 true
                             }
+
                             else -> false
                         }
                     }
@@ -75,6 +76,7 @@ class PostViewHolder(
             likeCount.text = createCount(post.likes)
             shareCount.text = createCount(post.shares)
             watchCount.text = post.watch.toString()
+
         }
     }
 }
