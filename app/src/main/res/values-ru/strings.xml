@@ -11,4 +11,7 @@
     <string name="post_text">Текст</string>
     <string name="edit">Редактировать</string>
     <string name="edit_message">Редактирование</string>
+    <string name="Save">сохранить</string>
+    <string name="imagePen">изображение ручки</string>
+    <string name="cancelEdit">отмена редактирования</string>
 </resources>
