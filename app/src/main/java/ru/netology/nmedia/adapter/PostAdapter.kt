@@ -42,9 +42,9 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            like.setImageResource(
-                if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.favorite_border_24
-            )
+            like.isChecked = post.likedByMe
+            like.text = createCount(post.likes)
+            share.text = createCount(post.shares)
 
             like.setOnClickListener {
                 onInteractionListener.like(post)
@@ -73,10 +73,7 @@ class PostViewHolder(
                     }
                 }.show()
             }
-            likeCount.text = createCount(post.likes)
-            shareCount.text = createCount(post.shares)
             watchCount.text = post.watch.toString()
-
         }
     }
 }

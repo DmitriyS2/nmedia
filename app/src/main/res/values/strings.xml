@@ -10,4 +10,7 @@
     <string name="post_text">Post text</string>
     <string name="edit">Edit</string>
     <string name="edit_message">Edit message</string>
+    <string name="Save">save</string>
+    <string name="imagePen">image pen</string>
+    <string name="cancelEdit">cancel edit</string>
 </resources>
