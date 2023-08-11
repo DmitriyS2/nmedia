@@ -14,4 +14,8 @@
     <string name="Save">сохранить</string>
     <string name="imagePen">изображение ручки</string>
     <string name="cancelEdit">отмена редактирования</string>
+    <string name="chooser_share_post">Поделиться</string>
+    <string name="description_post_save">Ок</string>
+    <string name="add_post">Добавить пост</string>
+    <string name="error_empty_content">Контент не может быть пустым</string>
 </resources>

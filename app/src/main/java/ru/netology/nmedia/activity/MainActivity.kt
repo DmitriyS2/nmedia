@@ -1,18 +1,18 @@
 package ru.netology.nmedia.activity
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
+import android.util.Log
+import androidx.activity.result.launch
 import androidx.activity.viewModels
+import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.util.AndroidUtils
-import ru.netology.nmedia.util.focusAndShowKeyboard
 import ru.netology.nmedia.viewmodel.PostViewModel
-import ru.netology.nmedia.viewmodel.getEmpty
+
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +28,16 @@ class MainActivity : AppCompatActivity() {
 
             override fun share(post: Post) {
                 viewModel.share(post.id)
+
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                    type = "text/plain"
+                }
+
+                val shareIntent =
+                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                startActivity(shareIntent)
             }
 
             override fun remove(post: Post) {
@@ -35,9 +45,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun edit(post: Post) {
-                binding.groupEdit.visibility = View.VISIBLE
-                binding.editText.setText(post.content)
                 viewModel.edit(post)
+                Log.d("MyLog", "вызван edit. content=${post.content}")
             }
         })
 
@@ -52,37 +61,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val editPostLauncher = registerForActivityResult(EditPostResultContract()) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.changeContentAndSave(result)
+        }
+
+
+        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.changeContentAndSave(result)
+            Log.d("MyLog", "из MainActivity $result")
+        }
+
+        binding.fab.setOnClickListener {
+            newPostLauncher.launch()
+        }
+
         viewModel.edited.observe(this) {
+            Log.d("MyLog", "edit observe ${it.id}")
             if (it.id != 0L) {
-                binding.content.setText(it.content)
-                binding.content.focusAndShowKeyboard()
+                editPostLauncher.launch(it.content)
+                Log.d("MyLog", "edit observe id!=0")
             }
-        }
-
-        binding.save.setOnClickListener {
-            val text = binding.content.text.toString()
-            if (text.isEmpty()) {
-                Toast.makeText(
-                    this,
-                    "Content can't be empty",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setOnClickListener
-            }
-
-            viewModel.changeContentAndSave(text)
-
-            binding.content.setText("")
-            binding.groupEdit.visibility = View.GONE
-            binding.content.clearFocus()
-            AndroidUtils.hideKeyboard(it)
-        }
-        binding.cancelEdit.setOnClickListener {
-            binding.content.setText("")
-            binding.groupEdit.visibility = View.GONE
-            binding.content.clearFocus()
-            AndroidUtils.hideKeyboard(it)
-            viewModel.edit(getEmpty())
         }
     }
 }

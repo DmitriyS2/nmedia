@@ -13,4 +13,8 @@
     <string name="Save">save</string>
     <string name="imagePen">image pen</string>
     <string name="cancelEdit">cancel edit</string>
+    <string name="chooser_share_post">Share post</string>
+    <string name="description_post_save">Ok</string>
+    <string name="add_post">addPost</string>
+    <string name="error_empty_content">Content can\'t be empty</string>
 </resources>
