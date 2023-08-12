@@ -1,11 +1,13 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.launch
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -15,12 +17,18 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 
 
 class MainActivity : AppCompatActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val viewModel: PostViewModel by viewModels()
+        val editPostLauncher = registerForActivityResult(EditPostResultContract()) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.changeContentAndSave(result)
+        }
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun like(post: Post) {
                 viewModel.like(post.id)
@@ -46,9 +54,16 @@ class MainActivity : AppCompatActivity() {
 
             override fun edit(post: Post) {
                 viewModel.edit(post)
-                Log.d("MyLog", "вызван edit. content=${post.content}")
+                editPostLauncher.launch(post.content)
+                //Log.d("MyLog", "вызван edit. content=${post.content}")
+            }
+
+            override fun showVideo(post: Post) {
+                val intentVideo = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
+                startActivity(intentVideo)
             }
         })
+
 
         binding.list.adapter = adapter
         viewModel.data.observe(this)
@@ -61,16 +76,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val editPostLauncher = registerForActivityResult(EditPostResultContract()) { result ->
-            result ?: return@registerForActivityResult
-            viewModel.changeContentAndSave(result)
-        }
-
-
         val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
             result ?: return@registerForActivityResult
             viewModel.changeContentAndSave(result)
-            Log.d("MyLog", "из MainActivity $result")
+            //Log.d("MyLog", "из MainActivity $result")
         }
 
         binding.fab.setOnClickListener {
@@ -78,10 +87,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.edited.observe(this) {
-            Log.d("MyLog", "edit observe ${it.id}")
+            //Log.d("MyLog", "edit observe ${it.id}")
             if (it.id != 0L) {
-                editPostLauncher.launch(it.content)
-                Log.d("MyLog", "edit observe id!=0")
+
+                //Log.d("MyLog", "edit observe id!=0")
             }
         }
     }

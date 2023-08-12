@@ -18,4 +18,6 @@ class EditPostResultContract : ActivityResultContract<String, String?>() {
         } else {
             null
         }
+
+
 }

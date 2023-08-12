@@ -4,18 +4,15 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
-import ru.netology.nmedia.R
-import ru.netology.nmedia.databinding.ActivityNewPostBinding
+import androidx.activity.OnBackPressedCallback
+import ru.netology.nmedia.databinding.ActivityEditPostBinding
 
 class EditPostActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        val binding = ActivityNewPostBinding.inflate(layoutInflater)
+        val binding = ActivityEditPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         intent?.let {
@@ -23,6 +20,15 @@ class EditPostActivity : AppCompatActivity() {
             val editText = it.getStringExtra(Intent.EXTRA_TEXT)
             binding.edit.setText(editText)
         }
+        val activity = this
+        activity.onBackPressedDispatcher.addCallback(
+            activity, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }
+            }
+        )
 
         binding.edit.requestFocus()
         binding.ok.setOnClickListener {
