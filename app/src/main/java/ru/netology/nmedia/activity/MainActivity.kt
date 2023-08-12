@@ -1,11 +1,13 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.launch
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -15,6 +17,8 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 
 
 class MainActivity : AppCompatActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
@@ -46,11 +50,17 @@ class MainActivity : AppCompatActivity() {
 
             override fun edit(post: Post) {
                 viewModel.edit(post)
-                Log.d("MyLog", "вызван edit. content=${post.content}")
+                //Log.d("MyLog", "вызван edit. content=${post.content}")
+            }
+
+            override fun showVideo(post: Post) {
+                val intentVideo = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
+                startActivity(intentVideo)
             }
         })
 
-        binding.list.adapter = adapter
+
+         binding.list.adapter = adapter
         viewModel.data.observe(this)
         { posts ->
             val newPost = posts.size > adapter.currentList.size

@@ -4,18 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
-import ru.netology.nmedia.R
-import ru.netology.nmedia.databinding.ActivityNewPostBinding
+import ru.netology.nmedia.databinding.ActivityEditPostBinding
 
 class EditPostActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        val binding = ActivityNewPostBinding.inflate(layoutInflater)
+        val binding = ActivityEditPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         intent?.let {

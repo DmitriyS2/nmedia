@@ -76,17 +76,47 @@
         app:layout_constraintTop_toBottomOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
+    <ImageButton
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="@dimen/spacing_4dp"
+        android:src="@drawable/sky"
+        app:layout_constraintTop_toBottomOf="@+id/content"
+        tools:src="@drawable/sky" />
+
+    <ImageView
+        android:id="@+id/buttonPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/videoView"
+        app:layout_constraintStart_toStartOf="@id/videoView"
+        app:layout_constraintEnd_toEndOf="@id/videoView"
+        android:src="@drawable/ic_play_circle_24"
+        app:layout_constraintTop_toTopOf="@id/videoView"
+        tools:layout_editor_absoluteX="170dp"
+        tools:src="@drawable/ic_play_circle_24" />
+
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/groupVideo"
+        app:constraint_referenced_ids="videoView, buttonPlay"
+        android:visibility="gone"
+        />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/like"
         style="@style/Widget.AppTheme.LikeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_4dp"
         android:background="@android:color/transparent"
         android:checkable="true"
         android:contentDescription="@string/like_Desc"
         app:icon="@drawable/ic_like_selector"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/content" />
+        app:layout_constraintTop_toBottomOf="@id/videoView" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/share"
