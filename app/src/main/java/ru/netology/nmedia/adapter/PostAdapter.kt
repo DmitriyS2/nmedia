@@ -48,9 +48,12 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
-            if (!post.videoUrl.isEmpty()) {
+            if (post.videoUrl.isNotEmpty()) {
                 binding.groupVideo.visibility = View.VISIBLE
+            } else{
+                binding.groupVideo.visibility = View.GONE
             }
+
             videoView.setOnClickListener {
                 onInteractionListener.showVideo(post)
             }

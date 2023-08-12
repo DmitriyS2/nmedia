@@ -25,6 +25,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val viewModel: PostViewModel by viewModels()
+        val editPostLauncher = registerForActivityResult(EditPostResultContract()) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.changeContentAndSave(result)
+        }
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun like(post: Post) {
                 viewModel.like(post.id)
@@ -50,6 +54,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun edit(post: Post) {
                 viewModel.edit(post)
+                editPostLauncher.launch(post.content)
                 //Log.d("MyLog", "вызван edit. content=${post.content}")
             }
 
@@ -60,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-         binding.list.adapter = adapter
+        binding.list.adapter = adapter
         viewModel.data.observe(this)
         { posts ->
             val newPost = posts.size > adapter.currentList.size
@@ -71,16 +76,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val editPostLauncher = registerForActivityResult(EditPostResultContract()) { result ->
-            result ?: return@registerForActivityResult
-            viewModel.changeContentAndSave(result)
-        }
-
-
         val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
             result ?: return@registerForActivityResult
             viewModel.changeContentAndSave(result)
-            Log.d("MyLog", "из MainActivity $result")
+            //Log.d("MyLog", "из MainActivity $result")
         }
 
         binding.fab.setOnClickListener {
@@ -88,10 +87,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.edited.observe(this) {
-            Log.d("MyLog", "edit observe ${it.id}")
+            //Log.d("MyLog", "edit observe ${it.id}")
             if (it.id != 0L) {
-                editPostLauncher.launch(it.content)
-                Log.d("MyLog", "edit observe id!=0")
+
+                //Log.d("MyLog", "edit observe id!=0")
             }
         }
     }
