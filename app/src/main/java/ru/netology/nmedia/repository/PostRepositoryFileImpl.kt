@@ -6,16 +6,22 @@ import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ru.netology.nmedia.dto.Post
+import kotlin.properties.Delegates
 
-class PostRepositoryJsonImpl(
-    context: Context,
+class PostRepositoryFileImpl(
+    private val context: Context,
 ) : PostRepository {
     private val gson = Gson()
-    private val prefs = context.getSharedPreferences("repo", Context.MODE_PRIVATE)
     private val type = TypeToken.getParameterized(List::class.java, Post::class.java).type
-    private val postKey = "posts"
-    private val nextIdKey = "next_id"
+    private val filePostName = "posts.json"
+
     private var nextId = 1L
+        set(value) {
+            field = value
+            sync()
+        }
+    private val fileNextIdName = "next_id.json"
+
     private var posts = emptyList<Post>()
         set(value) {
             field = value
@@ -26,21 +32,26 @@ class PostRepositoryJsonImpl(
     private val data = MutableLiveData(posts)
 
     init {
-        prefs.getString(postKey, null)?.let {
-            posts = gson.fromJson(it, type)
-
+        val filePost = context.filesDir.resolve(filePostName)
+            if (filePost.exists()) {
+            context.openFileInput(filePostName).bufferedReader().use {
+                posts = gson.fromJson(it, type)
+            }
+        } else {
+            posts = emptyList()
         }
-        nextId = prefs.getLong(nextIdKey, nextId)
-        data.value = posts
+
+        val fileNextId = context.filesDir.resolve(fileNextIdName)
+        if (fileNextId.exists()) {
+            context.openFileInput(fileNextIdName).bufferedReader().use {
+                nextId = gson.fromJson(it, Long::class.java)
+            }
+        } else {
+            nextId = 1L
+        }
     }
 
-//    init {
-//        posts = prefs.getString(postKey, null)?.let {
-//            gson.fromJson<List<Post>>(it,type)
-//        } .orEmpty()
-//        nextId = prefs.getLong(nextIdKey, nextId)
-//        data.value = posts
-//    }
+
 
     override fun getAll(): LiveData<List<Post>> = data
 
@@ -54,12 +65,12 @@ class PostRepositoryJsonImpl(
                     published = "now"
                 )
             ) + posts
-
         }
 
         posts = posts.map {
             if (it.id != post.id) it else it.copy(content = post.content)
         }
+        sync()
     }
 
     override fun like(id: Long) {
@@ -82,10 +93,18 @@ class PostRepositoryJsonImpl(
     }
 
     private fun sync() {
-        with(prefs.edit()) {
-            putString(postKey, gson.toJson(posts))
-            putLong(nextIdKey, nextId)
-            apply()
+//        context.openFileOutput(filePostName, Context.MODE_PRIVATE).bufferedWriter().use {
+//            it.write(gson.toJson(posts))
+//        }
+//        context.openFileOutput(fileNextIdName, Context.MODE_PRIVATE).bufferedWriter().use {
+//            it.write(gson.toJson(nextId))
+//        }
+
+        context.filesDir.resolve(filePostName).writer().buffered().use {
+            it.write(gson.toJson(posts))
+        }
+        context.filesDir.resolve(fileNextIdName).writer().buffered().use {
+            it.write(gson.toJson(nextId))
         }
     }
 }
