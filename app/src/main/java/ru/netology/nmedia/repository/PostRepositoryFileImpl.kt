@@ -25,11 +25,6 @@ class PostRepositoryFileImpl(
             sync()
         }
 
-//    private var posts = emptyList<Post>()
-//        set(value) {
-//            field = value
-//            data.value = value
-//        }
 
     private val data = MutableLiveData(posts)
 

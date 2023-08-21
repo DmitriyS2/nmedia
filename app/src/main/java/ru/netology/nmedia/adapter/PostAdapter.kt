@@ -1,9 +1,11 @@
 package ru.netology.nmedia.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.constraintlayout.widget.Group
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,7 @@ interface OnInteractionListener {
     fun remove(post: Post)
     fun edit(post: Post)
     fun showVideo(post: Post)
+    fun goToPost(post: Post)
 }
 
 class PostsAdapter(
@@ -40,6 +43,13 @@ class PostViewHolder(
     private val binding: CardPostBinding,
     private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
+
+    fun Group.setAllOnClickListener(listener: View.OnClickListener?) {
+        referencedIds.forEach { id ->
+            rootView.findViewById<View>(id).setOnClickListener(listener)
+        }
+    }
+
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
@@ -62,6 +72,10 @@ class PostViewHolder(
             }
             share.setOnClickListener {
                 onInteractionListener.share(post)
+            }
+            groupPost.setAllOnClickListener {
+                Log.d("MyLog", "groupPost ${post.id}")
+                onInteractionListener.goToPost(post)
             }
 
             menu.setOnClickListener {

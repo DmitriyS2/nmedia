@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/between_posts"
-    tools:context=".activity.MainActivity">
+    tools:context=".activity.FeedFragment">
 
     <ImageView
         android:id="@+id/avatar"
@@ -148,5 +148,12 @@
         android:src="@drawable/remove_red_eye_24"
         app:layout_constraintEnd_toStartOf="@id/watchCount"
         app:layout_constraintTop_toTopOf="@id/like" />
+
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/groupPost"
+        app:constraint_referenced_ids="avatar, author, published, content"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
