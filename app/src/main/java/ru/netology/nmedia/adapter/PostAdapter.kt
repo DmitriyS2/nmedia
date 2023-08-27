@@ -58,7 +58,7 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
-            if (post.videoUrl.isNotEmpty()) {
+            if (post.videoUrl!="no_video") {
                 binding.groupVideo.visibility = View.VISIBLE
             } else{
                 binding.groupVideo.visibility = View.GONE
@@ -98,7 +98,7 @@ class PostViewHolder(
                     }
                 }.show()
             }
-            watchCount.text = post.watch.toString()
+            watchCount.text = post.watches.toString()
         }
     }
 }
