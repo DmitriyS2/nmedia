@@ -79,7 +79,7 @@ class FCMService : FirebaseMessagingService() {
         println(token)
     }
 
-    private fun handleLike(contentTitle: String, contentText:String="") {
+    fun handleLike(contentTitle: String, contentText:String="") {
 
         val intent = Intent(this, AppActivity::class.java)
         val pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)

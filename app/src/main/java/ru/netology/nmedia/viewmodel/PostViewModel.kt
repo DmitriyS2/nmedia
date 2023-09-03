@@ -2,15 +2,21 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import android.os.Build
+
+
 import androidx.annotation.RequiresApi
+
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import ru.netology.nmedia.R
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryRoomImpl
+import ru.netology.nmedia.service.FCMService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import android.content.Context
 
 
 private val empty = Post(
@@ -45,6 +51,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value?.let {
             val text = content.trim()
             if (it.content != text) {
+//                val fcm1 = FCMService()
+//                val contTitle = "${it.author} опубликовал новый пост"
+//                fcm1.handleLike(contTitle, text)
                 repository.save(it.copy(content = text, published = dateTime))
             }
         }
