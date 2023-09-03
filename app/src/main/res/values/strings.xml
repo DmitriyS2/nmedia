@@ -22,5 +22,6 @@
     <string name="channel_remote_name">Server notifications</string>
     <string name="channel_remote_description">Notifications from remote server</string>
     <string name="warning">Message cannot be displayed!</string>
+    <string name="newpost">%1$s published a new post</string>
 
 </resources>

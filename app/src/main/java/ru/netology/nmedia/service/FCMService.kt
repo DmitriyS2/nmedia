@@ -14,6 +14,7 @@ import com.google.gson.Gson
 import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
+import android.util.Log
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.AppActivity
 import kotlin.random.Random
@@ -43,36 +44,55 @@ class FCMService : FirebaseMessagingService() {
 
         message.data[action]?.let {
             when (it) {
-                Action.LIKE.toString() -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-                else ->  handleLike(Like(0,"",0,""), false)
+                Action.LIKE.toString() -> {
+                    val contentLike = gson.fromJson(message.data[content], Like::class.java)
+                    val contentTitle = getString(
+                        R.string.notification_user_liked,
+                        contentLike.userName,
+                        contentLike.postAuthor
+                    )
+                    Log.d("MyLog", "$contentTitle")
+                    handleLike(contentTitle)
+                }
+
+                Action.POST.toString() -> {
+                    val contentPost = gson.fromJson(message.data[content], NewPost::class.java)
+                    val contentTitle = getString(
+                        R.string.newpost,
+                        contentPost.author
+                    )
+                    val contentText = contentPost.text
+                    Log.d("MyLog", "Title: $contentTitle, text:$contentText")
+                    handleLike(contentTitle,contentText)
+                }
+
+                else -> {
+                    handleLike(getString(R.string.warning))
+                }
 //
             }
         }
     }
 
+
     override fun onNewToken(token: String) {
         println(token)
     }
 
-    private fun handleLike(content: Like, action:Boolean = true) {
+    fun handleLike(contentTitle: String, contentText:String="") {
 
         val intent = Intent(this, AppActivity::class.java)
         val pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification_foreground)
-            .setContentTitle(
-                 if(action) { getString(
-                    R.string.notification_user_liked,
-                    content.userName,
-                    content.postAuthor)
-                } else { getString(
-                    R.string.warning)
-                    }
-            )
+            .setContentTitle(contentTitle)
+            .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pi)
             .setAutoCancel(true)
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText(contentText))
             .build()
 
         notify(notification)
@@ -93,7 +113,13 @@ class FCMService : FirebaseMessagingService() {
 
 enum class Action {
     LIKE,
+    POST,
 }
+
+data class NewPost(
+    val author:String,
+    val text:String
+)
 
 data class Like(
     val userId: Long,
