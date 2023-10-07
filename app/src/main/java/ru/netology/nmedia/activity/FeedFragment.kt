@@ -112,6 +112,12 @@ class FeedFragment : Fragment() {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
+        binding.swipeRW.setOnRefreshListener {
+            viewModel.data.value?.refreshing = true
+            viewModel.loadPosts()
+            binding.swipeRW.isRefreshing = false
+        }
+
 //        binding.list.adapter = adapter
 //
 //        viewModel.data.observe(viewLifecycleOwner)

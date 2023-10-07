@@ -55,12 +55,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRW"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/card_post" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/card_post" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -73,90 +80,90 @@
         app:srcCompat="@drawable/ic_add_24dp" />
 
 
-<!--    <androidx.constraintlayout.widget.Barrier-->
-<!--        android:id="@+id/barrierTop"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:barrierDirection="top"-->
-<!--        app:constraint_referenced_ids="content, save" />-->
+    <!--    <androidx.constraintlayout.widget.Barrier-->
+    <!--        android:id="@+id/barrierTop"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:barrierDirection="top"-->
+    <!--        app:constraint_referenced_ids="content, save" />-->
 
-<!--    <EditText-->
-<!--        android:id="@+id/content"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="@android:color/transparent"-->
-<!--        android:hint="@string/post_text"-->
-<!--        android:importantForAutofill="no"-->
-<!--        android:inputType="textMultiLine"-->
-<!--        android:maxLines="6"-->
-<!--        android:padding="@dimen/spacing_8dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toStartOf="@id/save"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="@id/barrierTop" />-->
+    <!--    <EditText-->
+    <!--        android:id="@+id/content"-->
+    <!--        android:layout_width="0dp"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:background="@android:color/transparent"-->
+    <!--        android:hint="@string/post_text"-->
+    <!--        android:importantForAutofill="no"-->
+    <!--        android:inputType="textMultiLine"-->
+    <!--        android:maxLines="6"-->
+    <!--        android:padding="@dimen/spacing_8dp"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toStartOf="@id/save"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="@id/barrierTop" />-->
 
-<!--    <ImageButton-->
-<!--        android:id="@+id/save"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="@dimen/spacing_8dp"-->
-<!--        android:background="@android:color/transparent"-->
-<!--        android:contentDescription="@string/Save"-->
-<!--        android:src="@drawable/ic_save_48"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toEndOf="@id/content" />-->
+    <!--    <ImageButton-->
+    <!--        android:id="@+id/save"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="@dimen/spacing_8dp"-->
+    <!--        android:background="@android:color/transparent"-->
+    <!--        android:contentDescription="@string/Save"-->
+    <!--        android:src="@drawable/ic_save_48"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toEndOf="@id/content" />-->
 
-<!--    <ImageView-->
-<!--        android:id="@+id/imagePen"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginBottom="@dimen/spacing_4dp"-->
-<!--        android:contentDescription="@string/imagePen"-->
-<!--        android:src="@drawable/ic_create_24"-->
-<!--        app:layout_constraintBottom_toTopOf="@id/barrierTop"-->
-<!--        app:layout_constraintStart_toStartOf="parent" />-->
+    <!--    <ImageView-->
+    <!--        android:id="@+id/imagePen"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginBottom="@dimen/spacing_4dp"-->
+    <!--        android:contentDescription="@string/imagePen"-->
+    <!--        android:src="@drawable/ic_create_24"-->
+    <!--        app:layout_constraintBottom_toTopOf="@id/barrierTop"-->
+    <!--        app:layout_constraintStart_toStartOf="parent" />-->
 
-<!--    <TextView-->
-<!--        android:id="@+id/inscriptionEdit"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="@dimen/spacing_8dp"-->
-<!--        android:text="@string/edit_message"-->
-<!--        android:textColor="#161cc9"-->
-<!--        app:layout_constraintStart_toEndOf="@id/imagePen"-->
-<!--        app:layout_constraintTop_toTopOf="@id/imagePen" />-->
+    <!--    <TextView-->
+    <!--        android:id="@+id/inscriptionEdit"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="@dimen/spacing_8dp"-->
+    <!--        android:text="@string/edit_message"-->
+    <!--        android:textColor="#161cc9"-->
+    <!--        app:layout_constraintStart_toEndOf="@id/imagePen"-->
+    <!--        app:layout_constraintTop_toTopOf="@id/imagePen" />-->
 
-<!--    <TextView-->
-<!--        android:id="@+id/editText"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="@dimen/spacing_8dp"-->
-<!--        android:layout_marginTop="@dimen/spacing_4dp"-->
-<!--        android:ellipsize="end"-->
-<!--        android:singleLine="true"-->
-<!--        app:layout_constraintEnd_toStartOf="@id/cancelEdit"-->
-<!--        app:layout_constraintStart_toEndOf="@id/imagePen"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/inscriptionEdit"-->
-<!--        tools:text="message1111111111111111111111111111111111" />-->
+    <!--    <TextView-->
+    <!--        android:id="@+id/editText"-->
+    <!--        android:layout_width="0dp"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="@dimen/spacing_8dp"-->
+    <!--        android:layout_marginTop="@dimen/spacing_4dp"-->
+    <!--        android:ellipsize="end"-->
+    <!--        android:singleLine="true"-->
+    <!--        app:layout_constraintEnd_toStartOf="@id/cancelEdit"-->
+    <!--        app:layout_constraintStart_toEndOf="@id/imagePen"-->
+    <!--        app:layout_constraintTop_toBottomOf="@id/inscriptionEdit"-->
+    <!--        tools:text="message1111111111111111111111111111111111" />-->
 
-<!--    <ImageButton-->
-<!--        android:id="@+id/cancelEdit"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="@android:color/transparent"-->
-<!--        android:contentDescription="@string/cancelEdit"-->
-<!--        android:src="@drawable/ic_cancel_48"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="@id/imagePen"-->
+    <!--    <ImageButton-->
+    <!--        android:id="@+id/cancelEdit"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:background="@android:color/transparent"-->
+    <!--        android:contentDescription="@string/cancelEdit"-->
+    <!--        android:src="@drawable/ic_cancel_48"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="@id/imagePen"-->
 
-<!--        />-->
+    <!--        />-->
 
-<!--    <androidx.constraintlayout.widget.Group-->
-<!--        android:id="@+id/groupEdit"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:visibility="gone"-->
-<!--        app:constraint_referenced_ids="imagePen,inscriptionEdit,editText,cancelEdit" />-->
+    <!--    <androidx.constraintlayout.widget.Group-->
+    <!--        android:id="@+id/groupEdit"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:visibility="gone"-->
+    <!--        app:constraint_referenced_ids="imagePen,inscriptionEdit,editText,cancelEdit" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
