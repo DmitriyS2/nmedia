@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.util.AndroidUtils
@@ -22,9 +22,11 @@ class NewPostFragment : Fragment() {
         var Bundle.textArg: String? by StringArg
     }
 
-    private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment
-    )
+    private val viewModel: PostViewModel by activityViewModels()
+
+//    private val viewModel: PostViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment
+//    )
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -46,8 +48,16 @@ class NewPostFragment : Fragment() {
         }
 
         binding.ok.setOnClickListener {
-            viewModel.changeContentAndSave(binding.edit.text.toString())
+            viewModel.changeContent(binding.edit.text.toString())
+            viewModel.save()
             AndroidUtils.hideKeyboard(requireView())
+            editText = ""
+            //viewModel.loadPosts()
+            //findNavController().navigateUp()
+        }
+
+        viewModel.postCreated.observe(viewLifecycleOwner) {
+            viewModel.loadPosts()
             editText = ""
             findNavController().navigateUp()
         }

@@ -36,6 +36,17 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            manifestPlaceholders.usesCleartextTraffic = false
+        }
+        debug {
+            manifestPlaceholders.usesCleartextTraffic = true
+        }
+    }
 }
 
 dependencies {
@@ -59,4 +70,5 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:32.2.3')
     implementation "com.google.firebase:firebase-messaging-ktx"
     implementation "com.google.android.gms:play-services-base:18.2.0"
+    implementation "com.squareup.okhttp3:okhttp:4.10.0"
 }

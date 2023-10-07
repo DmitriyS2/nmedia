@@ -98,6 +98,7 @@ class PostViewHolder(
                     }
                 }.show()
             }
+
             watchCount.text = post.watches.toString()
         }
     }
