@@ -9,9 +9,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.dto.Post
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
-class PostRepositoryImpl: PostRepository {
+class PostRepositoryImpl : PostRepository {
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .build()
@@ -36,93 +35,33 @@ class PostRepositoryImpl: PostRepository {
             }
     }
 
-    override fun likeById(id: Long) {
+    override fun likeById(post: Post): Post {
 
-        //получаю post с сервера по id
-        val request: Request = Request.Builder()
-            .url("${BASE_URL}/api/slow/posts/$id")
-            .build()
-        val call = client.newCall(request)
-        val response = call.execute()
-        val responseString = response.body?.string() ?: error("no body")
-        var post = gson.fromJson(responseString, Post::class.java)
+        //Log.d("MyLog", "post из repo ${post.toString()}")
 
-//        var post:Post = client.newCall(request)
-//            .execute()
-//            .let { it.body?.string() ?: throw RuntimeException("body is null") }
-//            .let {
-//                gson.fromJson(it, Post::class.java)
-//            }
+        val request: Request = if (!post.likedByMe) {
+            Request.Builder()
+                .post("".toRequestBody())
+                .url("${BASE_URL}/api/slow/posts/${post.id}/likes")
+                .build()
+        } else {
+            Request.Builder()
+                .delete()
+                .url("${BASE_URL}/api/slow/posts/${post.id}/likes")
+                .build()
+        }
 
-        //меняю состояние и счетчик лайков
-        post = post.copy(likes = if(post.likedByMe) post.likes-1 else post.likes+1, likedByMe = !post.likedByMe)
+        val postAnswer: Post = client.newCall(request)
+            .execute()
+            .let { it.body?.string() ?: throw RuntimeException("body is null") }
+            .let {
+                gson.fromJson(it, Post::class.java)
+            }
 
-        Log.d("MyLog", "post ${post.toString()}")
+        //Log.d("MyLog", "postAnswer ${postAnswer.toString()}")
 
-            //запрос на внесение измененного поста
-        val requestToChange: Request = Request.Builder()
-            .post(gson.toJson(post).toRequestBody(jsonType))
-            .url("${BASE_URL}/api/slow/posts/$id/likes")
-            .build()
+        return postAnswer
 
-            //вызываю запрос
-        val callToChange = client.newCall(requestToChange)
-        val responseChange = callToChange.execute()
-        responseChange.close()
-
-//        if(post.likedByMe) {
-//            val requestTrue: Request = Request.Builder()
-//                .delete()
-//                .url("${BASE_URL}/api/slow/posts/$id/likes")
-//                .build()
-//            val callTrue = client.newCall(requestTrue)
-//            val responseTrue = callTrue.execute()
-//            val responseStringTrue = responseTrue.body?.string() ?: error("no body")
-//
-//            Log.d("MyLog", "responseStringTrue true ${responseStringTrue}")
-
-//            post = gson.fromJson(responseStringTrue, Post::class.java)
-//            responseTrue.close()
-//        } else {
-//            post = post.copy(likes = if(post.likedByMe) post.likes-1 else post.likes+1, likedByMe = !post.likedByMe)
-//            Log.d("MyLog", "else ${post.toString()}")
-//
-//            val requestFalse: Request = Request.Builder()
-//                .post(gson.toJson(post).toRequestBody(jsonType))
-//                .url("${BASE_URL}/api/slow/posts/$id/likes")
-//                .build()
-//
-//            val requestCheck: Request = Request.Builder()
-//                .url("${BASE_URL}/api/slow/posts/$id")
-//                .build()
-
-
-//            var result:Post = client.newCall(requestFalse)
-//                .execute()
-//                .let { it.body?.string() ?: throw RuntimeException("body is null") }
-//                .let {
-//                    gson.fromJson(it, Post::class.java)
-//                }
-            //Log.d("MyLog", "result ${result.toString()}")
-//            val callFalse = client.newCall(requestFalse)
-//            val responseFalse = callFalse.execute()
-//            val responseStringFalse = responseFalse.body?.string() ?: error("no body")
-
-//            Log.d("MyLog", "responseStringFalse post/false ${responseStringFalse}")
-
-//            post = gson.fromJson(responseStringFalse, Post::class.java)
-//            responseFalse.close()
-//
-//            val callCheck = client.newCall(requestCheck)
-//            val responseCheck = callCheck.execute()
-//            val responseStringCheck = responseCheck.body?.string() ?: error("no body")
-//
-//            Log.d("MyLog", "responseStringCheck false ${responseStringCheck}")
-//
-//            post = gson.fromJson(responseStringCheck, Post::class.java)
-//            responseCheck.close()
-
-//        }
     }
 
     override fun shareById(id: Long) {
@@ -139,7 +78,6 @@ class PostRepositoryImpl: PostRepository {
             .execute()
             .close()
     }
-
 
 
     override fun removeById(id: Long) {

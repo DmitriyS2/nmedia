@@ -26,9 +26,6 @@ private val empty = Post(
     videoUrl = "no_video"
 )
 
-//fun getEmpty(): Post {
-//    return empty
-//}
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository = PostRepositoryImpl()
@@ -50,7 +47,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             // Начинаем загрузку
             val value = _data.value
             if (value != null) {
-                if(!value.refreshing)
+                if (!value.refreshing)
                     _data.postValue(FeedModel(loading = true))
             }
             try {
@@ -112,49 +109,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = edited.value?.copy(content = text)
     }
 
-    fun likeById(id: Long) {
+    fun likeById(post: Post) {
         thread {
-            Log.d("MyLog", "viewModel До ${_data.value?.posts?.filter { it.id == id }.toString()}")
+            //Log.d("MyLog", "viewModel до ${_data.value?.posts?.filter { it.id == post.id }.toString()}")
 
+            val newPost = repository.likeById(post)
 
-            // показывает без счетчика(обновляется если зайти в создание поста и выйти), но в _data изменения видны
-//            _data.value?.posts = _data.value?.posts?.map {
-//                if (it.id != id) it else it.copy(
-//                    likedByMe = !it.likedByMe,
-//                    likes = if (it.likedByMe) (it.likes - 1) else (it.likes + 1)
-//                )
-//            }.orEmpty()
+            //Log.d("MyLog", "newPost ${newPost.toString()}")
 
-
-            // показывает в приложении правильно, но в _data по логу без изменений
-            _data.value?.let {
-                _data.postValue(
-                    _data.value?.copy(posts = _data.value?.posts?.map { post->
-                        if (post.id != id) {
-                            post
-                        } else {
-                            post.copy(
-                                likedByMe = !post.likedByMe,
-                                likes = if (post.likedByMe) (post.likes - 1) else (post.likes + 1)
-                            )
-                        }
-                    }.orEmpty()))
-            }
-
-            // показывает в приложении правильно, но в _data по логу без изменений
-//            _data.postValue(
-//                  _data.value?.posts?.map {
-//                if (it.id != id) it else it.copy(
-//                    likes = if (it.likedByMe) (it.likes - 1) else (it.likes + 1),
-//                    likedByMe = !it.likedByMe
-//                )
-//            }?.let { _data.value?.copy(posts = it) })
-
-            Log.d("MyLog", "viewModel После ${_data.value?.posts?.filter { it.id==id }.toString()}")
-
-
-            repository.save(_data.value?.posts?.filter { it.id==id }?.first()!!)
-            repository.likeById(id)
+            _data.postValue(FeedModel(posts = data.value?.posts?.map {
+                if (it.id != newPost.id) it else newPost
+            }.orEmpty()))
         }
     }
 
