@@ -42,11 +42,12 @@ class CurrentPostFragment : Fragment() {
 
         val currentId = arguments?.textArgument?.toLong()
 
+
         viewModel.data.observe(viewLifecycleOwner) { list ->
-            list.find { it.id == currentId }?.let {
+            list.posts.find { it.id == currentId }?.let {
                 PostViewHolder(binding.singlePost, object : OnInteractionListener {
                     override fun like(post: Post) {
-                        viewModel.like(post.id)
+                        viewModel.likeById(post.id)
                     }
 
                     override fun share(post: Post) {

@@ -24,4 +24,7 @@
     <string name="channel_remote_description">Уведомления с удаленного сервера</string>
     <string name="warning">Сообщение не может быть отображено</string>
     <string name="newpost">%1$s опубликовал новый пост</string>
+    <string name="retry_loading">Повторить попытку</string>
+    <string name="empty_posts">Нет сообщений</string>
+    <string name="error_loading">Что-то пошло не так</string>
 </resources>
