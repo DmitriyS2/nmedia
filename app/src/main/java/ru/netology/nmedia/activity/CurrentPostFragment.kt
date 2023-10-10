@@ -47,7 +47,7 @@ class CurrentPostFragment : Fragment() {
             list.posts.find { it.id == currentId }?.let {
                 PostViewHolder(binding.singlePost, object : OnInteractionListener {
                     override fun like(post: Post) {
-                        viewModel.likeById(post.id)
+                        viewModel.likeById(post)
                     }
 
                     override fun share(post: Post) {

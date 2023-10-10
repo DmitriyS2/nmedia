@@ -58,7 +58,7 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
-            if (post.videoUrl!="no_video") {
+            if (post.videoUrl!=null) {
                 binding.groupVideo.visibility = View.VISIBLE
             } else{
                 binding.groupVideo.visibility = View.GONE
