@@ -51,7 +51,7 @@ class CurrentPostFragment : Fragment() {
                     }
 
                     override fun share(post: Post) {
-                        viewModel.share(post.id)
+                        viewModel.share(post)
 
                         val intent = Intent().apply {
                             action = Intent.ACTION_SEND
