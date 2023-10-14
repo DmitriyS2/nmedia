@@ -1,6 +1,7 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
+import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
@@ -40,7 +41,7 @@ class PostRepositoryImpl : PostRepository {
 //            }
 //    }
 
-    override fun getAllAsync(callback: PostRepository.GetAllCallback) {
+    override fun getAllAsync(callback: PostRepository.RepositoryCallback<List<Post>>) {
         val request: Request = Request.Builder()
             .url("${BASE_URL}/api/posts")
             .build()
@@ -51,6 +52,15 @@ class PostRepositoryImpl : PostRepository {
                     val body = response.body?.string() ?: throw RuntimeException("body is null")
                     try {
                         callback.onSuccess(gson.fromJson(body, typeToken.type))
+
+//                        if(_data.value?.empty == false) {
+//                            for(i in _data.value?.posts!!){
+//                                Glide.with(this)
+//                                    .load("http://192.168.1.10:9999/api/posts/avatars/${i.authorAvatar}")
+//                                    .timeout(10_000)
+//                                    .into(this)
+//                            }
+
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
@@ -89,7 +99,7 @@ class PostRepositoryImpl : PostRepository {
 //
 //    }
 
-    override fun likeByIdAsync(post: Post, callback: PostRepository.LikeCallback) {
+    override fun likeByIdAsync(post: Post, callback: PostRepository.RepositoryCallback<Post>) {
 
         val request: Request = if (!post.likedByMe) {
             Request.Builder()
@@ -150,7 +160,7 @@ class PostRepositoryImpl : PostRepository {
 //            .close()
 //    }
 
-    override fun removeByIdAsync(id: Long, callback: PostRepository.RemoveCallback) {
+    override fun removeByIdAsync(id: Long, callback: PostRepository.RepositoryCallback<Long>) {
         val request: Request = Request.Builder()
                 .delete()
                 .url("${BASE_URL}/api/posts/$id")

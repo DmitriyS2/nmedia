@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.Group
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.CounterView.createCount
@@ -58,6 +59,13 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
+            Glide.with (avatar)
+                .load("http://192.168.1.10:9999/avatars/${post.authorAvatar}")
+                .placeholder(R.drawable.baseline_emoji_emotions_24)
+                .error(R.drawable.remove_red_eye_24)
+                .timeout(10_000)
+                .into(avatar)
+
             if (post.videoUrl!=null) {
                 binding.groupVideo.visibility = View.VISIBLE
             } else{
