@@ -53,14 +53,6 @@ class PostRepositoryImpl : PostRepository {
                     try {
                         callback.onSuccess(gson.fromJson(body, typeToken.type))
 
-//                        if(_data.value?.empty == false) {
-//                            for(i in _data.value?.posts!!){
-//                                Glide.with(this)
-//                                    .load("http://192.168.1.10:9999/api/posts/avatars/${i.authorAvatar}")
-//                                    .timeout(10_000)
-//                                    .into(this)
-//                            }
-
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
