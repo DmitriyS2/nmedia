@@ -73,6 +73,18 @@ class PostViewHolder(
                 binding.groupVideo.visibility = View.GONE
             }
 
+            if(post.attachment!=null) {
+                Glide.with (attachmentImage)
+                    .load("http://192.168.1.10:9999/images/${post.attachment.url}")
+                    .placeholder(R.drawable.baseline_autorenew_24)
+                    .error(R.drawable.ic_cancel_48)
+                    .timeout(10_000)
+                    .into(attachmentImage)
+                attachmentImage.visibility = View.VISIBLE
+            } else {
+                attachmentImage.visibility = View.GONE
+            }
+
             videoView.setOnClickListener {
                 onInteractionListener.showVideo(post)
             }

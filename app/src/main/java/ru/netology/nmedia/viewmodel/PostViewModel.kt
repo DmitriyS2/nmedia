@@ -1,19 +1,14 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import androidx.lifecycle.*
-import com.bumptech.glide.Glide
-import ru.netology.nmedia.R
-import ru.netology.nmedia.activity.AppActivity
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.util.SingleLiveEvent
-import java.io.IOException
 import kotlin.concurrent.thread
 
 
