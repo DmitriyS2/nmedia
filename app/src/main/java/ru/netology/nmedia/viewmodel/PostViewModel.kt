@@ -8,6 +8,9 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import androidx.lifecycle.*
+import com.bumptech.glide.Glide
+import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.AppActivity
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.IOException
@@ -18,6 +21,7 @@ private val empty = Post(
     id = 0,
     content = "",
     author = "",
+    authorAvatar = "",
     published = "",
     likedByMe = false,
     likes = 0,
@@ -66,9 +70,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _data.value = FeedModel(loading = !_data.value!!.refreshing)
             //_data.value = FeedModel(loading = true)
         }
-        repository.getAllAsync(object : PostRepository.GetAllCallback {
+        repository.getAllAsync(object : PostRepository.RepositoryCallback<List<Post>> {
             override fun onSuccess(posts: List<Post>) {
                 _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+
+//                if(_data.value?.empty == false) {
+//                    for(i in _data.value?.posts!!){
+//                        Glide.with(this)
+//                            .load("http://192.168.1.10:9999/api/posts/avatars/${i.authorAvatar}")
+//                            .timeout(10_000)
+//                            //.into(this)
+//                    }
+//                }
             }
 
             override fun onError(e: Exception) {
@@ -143,7 +156,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
         //Log.d("MyLog", "viewModel до ${_data.value?.posts?.filter { it.id == post.id }.toString()}")
 
-        repository.likeByIdAsync(post, object : PostRepository.LikeCallback {
+        repository.likeByIdAsync(post, object : PostRepository.RepositoryCallback<Post> {
             override fun onSuccess(post: Post) {
                 _data.postValue(FeedModel(posts = data.value?.posts?.map {
                     if (it.id != post.id) it else post
@@ -184,7 +197,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun removeById(id: Long) {
 
         //val old = _data.value?.posts.orEmpty()
-        repository.removeByIdAsync(id, object : PostRepository.RemoveCallback {
+        repository.removeByIdAsync(id, object : PostRepository.RepositoryCallback<Long> {
             override fun onSuccess(id: Long) {
                 _data.postValue(
                     _data.value?.copy(posts = _data.value?.posts.orEmpty()
