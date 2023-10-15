@@ -73,15 +73,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         repository.getAllAsync(object : PostRepository.RepositoryCallback<List<Post>> {
             override fun onSuccess(posts: List<Post>) {
                 _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
-
-//                if(_data.value?.empty == false) {
-//                    for(i in _data.value?.posts!!){
-//                        Glide.with(this)
-//                            .load("http://192.168.1.10:9999/api/posts/avatars/${i.authorAvatar}")
-//                            .timeout(10_000)
-//                            //.into(this)
-//                    }
-//                }
             }
 
             override fun onError(e: Exception) {

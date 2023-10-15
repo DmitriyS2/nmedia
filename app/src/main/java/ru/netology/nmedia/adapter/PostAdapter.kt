@@ -64,6 +64,7 @@ class PostViewHolder(
                 .placeholder(R.drawable.baseline_emoji_emotions_24)
                 .error(R.drawable.remove_red_eye_24)
                 .timeout(10_000)
+                .circleCrop()
                 .into(avatar)
 
             if (post.videoUrl!=null) {
