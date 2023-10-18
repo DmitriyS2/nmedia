@@ -1,6 +1,8 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.dto.Post
@@ -9,7 +11,6 @@ import ru.netology.nmedia.repository.PostRepositoryImpl
 import androidx.lifecycle.*
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.util.SingleLiveEvent
-import kotlin.concurrent.thread
 
 
 private val empty = Post(
@@ -27,6 +28,7 @@ private val empty = Post(
 
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
+
     private val repository: PostRepository = PostRepositoryImpl()
 
     private val _data = MutableLiveData(FeedModel())
@@ -65,25 +67,42 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _data.value = FeedModel(loading = !_data.value!!.refreshing)
             //_data.value = FeedModel(loading = true)
         }
-        repository.getAllAsync(object : PostRepository.RepositoryCallback<List<Post>> {
-            override fun onSuccess(posts: List<Post>) {
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        repository.getAllAsync(object : PostRepository.Callback<List<Post>> {
+            override fun onSuccess(result: List<Post>) {
+                _data.value = FeedModel(posts = result, empty = result.isEmpty())
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+                _data.value = FeedModel(error = true)
+                Toast.makeText(getApplication(), "Не удалось обновить посты.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
+//    fun save() {
+//        edited.value?.let {
+//            thread {
+//                repository.save(it)
+//                _postCreated.postValue(Unit)
+//            }
+//        }
+//        edited.postValue(empty)
+//    }
+
     fun save() {
         edited.value?.let {
-            thread {
-                repository.save(it)
-                _postCreated.postValue(Unit)
-            }
+            repository.saveAsync(it, object :
+            PostRepository.Callback<Unit>{
+                override fun onSuccess(value: Unit) {
+                    _postCreated.value = Unit
+                }
+
+                override fun onError(e: Exception) {
+                    _data.value = FeedModel(error = true)
+                }
+            })
         }
-        edited.postValue(empty)
+        edited.value = empty
     }
 
 //    fun saveNew() {
@@ -138,29 +157,46 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //        }
 //    }
 
+//    fun likeById(post: Post) {
+//
+//        //Log.d("MyLog", "viewModel до ${_data.value?.posts?.filter { it.id == post.id }.toString()}")
+//
+//        repository.likeByIdAsync(post, object : PostRepository.RepositoryCallback<Post> {
+//            override fun onSuccess(result: Post) {
+//                _data.postValue(FeedModel(posts = data.value?.posts?.map {
+//                    if (it.id != result.id) it else result
+//                }.orEmpty()))
+//            }
+//
+//            override fun onError(e: Exception) {
+//                _data.postValue(FeedModel(posts = data.value?.posts.orEmpty(), error = true))
+//            }
+//        })
+//
+//        //Log.d("MyLog", "newPost ${newPost.toString()}")
+//    }
+
     fun likeById(post: Post) {
 
-        //Log.d("MyLog", "viewModel до ${_data.value?.posts?.filter { it.id == post.id }.toString()}")
-
-        repository.likeByIdAsync(post, object : PostRepository.RepositoryCallback<Post> {
-            override fun onSuccess(post: Post) {
-                _data.postValue(FeedModel(posts = data.value?.posts?.map {
-                    if (it.id != post.id) it else post
-                }.orEmpty()))
+        repository.likeByIdAsync(post, object : PostRepository.Callback<Post> {
+            override fun onSuccess(result: Post) {
+                Log.d("MyLog", "$result")
+                _data.value = _data.value?.copy(posts = data.value?.posts
+                    ?.map {
+                    if (it.id != result.id) it else result
+                }.orEmpty()
+                )
             }
-
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(posts = data.value?.posts.orEmpty(), error = true))
+                //_data.postValue(FeedModel(posts = data.value?.posts.orEmpty(), error = true))
+                _data.value = FeedModel(error = true)
+                Toast.makeText(getApplication(), "Не удалось отправить лайк.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
             }
         })
-
-        //Log.d("MyLog", "newPost ${newPost.toString()}")
     }
 
     fun share(post: Post) {
-
         repository.shareById(post)
-
     }
 
 //    fun removeById(id: Long) {
@@ -183,16 +219,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun removeById(id: Long) {
 
         //val old = _data.value?.posts.orEmpty()
-        repository.removeByIdAsync(id, object : PostRepository.RepositoryCallback<Long> {
-            override fun onSuccess(id: Long) {
-                _data.postValue(
-                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                        .filter { it.id != id }
-                    ))
+        repository.removeByIdAsync(id, object : PostRepository.Callback<Unit> {
+            override fun onSuccess(result:Unit) {
+//                _data.postValue(
+//                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
+//                        .filter { it.id != id }
+//                    ))
+                _data.value = _data.value?.copy(posts = _data.value?.posts
+                    .orEmpty()
+                    .filter { it.id != id })
             }
-
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(posts = data.value?.posts.orEmpty(), error = true))
+                //_data.postValue(FeedModel(posts = data.value?.posts.orEmpty(), error = true))
+                _data.value = FeedModel(error = true)
+                Toast.makeText(getApplication(), "Не удалось удалить пост.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
                 // _data.postValue(_data.value?.copy(posts = old))
             }
         })
