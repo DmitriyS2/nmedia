@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.CurrentPostFragment.Companion.textArgument
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
@@ -60,7 +61,8 @@ class FeedFragment : Fragment() {
             }
 
             override fun remove(post: Post) {
-                viewModel.removeById(post.id)
+               // viewModel.removeById(post.id)
+                viewModel.removeById(post)
             }
 
             override fun edit(post: Post) {
@@ -91,12 +93,36 @@ class FeedFragment : Fragment() {
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
+            binding.swipeRW.isRefreshing = state.refreshing
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .show()
+            }
+        }
+
+        viewModel.data.observe(viewLifecycleOwner) { state ->
+            val newPost = state.posts.size > adapter.currentList.size
+            adapter.submitList(state.posts) {
+                if (newPost) {
+                    binding.list.smoothScrollToPosition(0)
+                }
+            }
+
             binding.emptyText.isVisible = state.empty
         }
+
+        binding.swipeRW.setOnRefreshListener {
+            viewModel.refreshPosts()
+        }
+//        viewModel.data.observe(viewLifecycleOwner) { state ->
+//            adapter.submitList(state.posts)
+//            binding.progress.isVisible = state.loading
+//            binding.errorGroup.isVisible = state.error
+//            binding.emptyText.isVisible = state.empty
+//        }
 
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
@@ -106,16 +132,15 @@ class FeedFragment : Fragment() {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
-        binding.swipeRW.setOnRefreshListener {
-            viewModel.data.value?.refreshing = true
-            viewModel.loadPosts()
-            binding.swipeRW.isRefreshing = false
-        }
+//        binding.swipeRW.setOnRefreshListener {
+//            viewModel.data.value?.refreshing = true
+//            viewModel.loadPosts()
+//            binding.swipeRW.isRefreshing = false
+//        }
 
 //        binding.list.adapter = adapter
 //
-//        viewModel.data.observe(viewLifecycleOwner)
-//        { posts ->
+//        viewModel.data.observe(viewLifecycleOwner) { posts ->
 //            val newPost = posts.size > adapter.currentList.size
 //            adapter.submitList(posts) {
 //                if (newPost) {
@@ -123,9 +148,6 @@ class FeedFragment : Fragment() {
 //                }
 //            }
 //        }
-
-
-
         return binding.root
     }
 }
