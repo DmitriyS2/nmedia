@@ -11,6 +11,7 @@ data class Post(
     val shares: Int = 0,
     val watches: Int = 0,
     val videoUrl:String? = null,
+    val unSaved:Boolean = true
   //  val attachment: Attachment? = null
 )
 

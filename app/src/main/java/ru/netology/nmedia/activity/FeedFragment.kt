@@ -88,6 +88,10 @@ class FeedFragment : Fragment() {
                             textArgument = post.id.toString()
                         })
             }
+
+            override fun syncPost() {
+                viewModel.syncPost()
+            }
         })
 
 

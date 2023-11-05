@@ -77,6 +77,16 @@
         tools:text="@sample/posts.json/data/content" />
 
     <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/unSavedPost"
+        app:layout_constraintTop_toBottomOf="@+id/barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/sync_problem_48"
+        android:background="@android:color/transparent"
+        />
+
+    <ImageButton
         android:id="@+id/videoView"
         android:layout_width="match_parent"
         android:layout_height="200dp"

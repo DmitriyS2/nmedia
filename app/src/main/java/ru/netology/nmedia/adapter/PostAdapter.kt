@@ -5,11 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.CounterView.createCount
@@ -23,6 +26,7 @@ interface OnInteractionListener {
     fun edit(post: Post)
     fun showVideo(post: Post)
     fun goToPost(post: Post)
+    fun syncPost()
 }
 
 class PostsAdapter(
@@ -68,9 +72,19 @@ class PostViewHolder(
                 .into(avatar)
 
             if (post.videoUrl!=null) {
-                binding.groupVideo.visibility = View.VISIBLE
+                groupVideo.visibility = View.VISIBLE
             } else{
-                binding.groupVideo.visibility = View.GONE
+                groupVideo.visibility = View.GONE
+            }
+
+            if(post.unSaved) {
+                unSavedPost.visibility = View.VISIBLE
+            } else {
+                unSavedPost.visibility = View.GONE
+            }
+
+            unSavedPost.setOnClickListener {
+                onInteractionListener.syncPost()
             }
 
 //            if(post.attachment!=null) {
@@ -89,10 +103,14 @@ class PostViewHolder(
                 onInteractionListener.showVideo(post)
             }
             like.setOnClickListener {
-                onInteractionListener.like(post)
+                if(!post.unSaved) {
+                    onInteractionListener.like(post)
+                }
             }
             share.setOnClickListener {
-                onInteractionListener.share(post)
+                if(!post.unSaved) {
+                    onInteractionListener.share(post)
+                }
             }
             groupPost.setAllOnClickListener {
                 Log.d("MyLog", "groupPost ${post.id}")

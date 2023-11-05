@@ -13,6 +13,8 @@ interface PostRepository {
     suspend fun removeById(post: Post)
     suspend fun likeById(post: Post)
 
+    suspend fun syncPost(list: List<Post>)
+
 //    fun getAll(): List<Post>
  //   fun likeById(post: Post):Post
      fun shareById(post: Post)
