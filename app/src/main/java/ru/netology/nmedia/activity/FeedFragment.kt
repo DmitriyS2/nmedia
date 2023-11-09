@@ -90,7 +90,12 @@ class FeedFragment : Fragment() {
             }
 
             override fun syncPost() {
-                viewModel.syncPost()
+
+            }
+
+            override fun syncOnePost(post: Post) {
+               // viewModel.syncPost()
+                viewModel.syncOnePost(post)
             }
         })
 

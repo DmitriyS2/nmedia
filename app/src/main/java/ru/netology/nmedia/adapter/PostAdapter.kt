@@ -27,6 +27,7 @@ interface OnInteractionListener {
     fun showVideo(post: Post)
     fun goToPost(post: Post)
     fun syncPost()
+    fun syncOnePost(post: Post)
 }
 
 class PostsAdapter(
@@ -84,7 +85,7 @@ class PostViewHolder(
             }
 
             unSavedPost.setOnClickListener {
-                onInteractionListener.syncPost()
+                onInteractionListener.syncOnePost(post)
             }
 
 //            if(post.attachment!=null) {

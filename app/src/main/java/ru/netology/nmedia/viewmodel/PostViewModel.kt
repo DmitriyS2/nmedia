@@ -94,6 +94,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch {
                 try {
                     repository.save(it)
+                //    repository.syncOnePost(it)
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = true)
@@ -112,6 +113,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 .orEmpty()
                 _dataState.value = FeedModelState(loading = true)
                 repository.syncPost(listUnSaved)
+                _dataState.value = FeedModelState()
+            } catch (e:Exception) {
+                _dataState.value = FeedModelState(error = true)
+            }
+        }
+    }
+
+    fun syncOnePost(post: Post) {
+        viewModelScope.launch {
+            try {
+                _dataState.value = FeedModelState(loading = true)
+                repository.syncOnePost(post)
                 _dataState.value = FeedModelState()
             } catch (e:Exception) {
                 _dataState.value = FeedModelState(error = true)
