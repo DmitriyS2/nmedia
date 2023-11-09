@@ -94,6 +94,9 @@ class CurrentPostFragment : Fragment() {
 
                     }
 
+                    override fun syncOnePost(post: Post) {
+
+                    }
 
 
                 }).bind(it) //вызываем метод bind у PostViewHolder
