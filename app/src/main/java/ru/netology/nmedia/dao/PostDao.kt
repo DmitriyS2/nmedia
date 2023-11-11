@@ -42,6 +42,22 @@ interface PostDao {
         """
     )
     fun shareById(id: Long)
+
+        @Query(
+            """UPDATE PostEntity SET 
+                unSaved = :unSaved               
+                WHERE id = :id"""
+        )
+    fun updateContentById(id: Long, unSaved: Boolean)
+
+//    @Query(
+//        """UPDATE PostEntity SET
+//                unSaved = :unSaved,
+//                id = id+1
+//                WHERE id = :id"""
+//    )
+//    fun updateContent2ById(id: Long, unSaved: Boolean)
+
 }
 
 //@Dao

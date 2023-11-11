@@ -51,7 +51,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
-            dao.isEmpty()
+            // dao.isEmpty()
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -59,21 +59,85 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-  //  suspend fun checkIsEmpty() = dao.isEmpty()
+    //  suspend fun checkIsEmpty() = dao.isEmpty()
 
     override suspend fun save(post: Post) {
+
+         dao.insert(PostEntity.fromDto(post))
+//        var r = data.value!!.first()
+//        Log.d("MyLog", "id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
+
         try {
+            val response = PostsApi.service.save(post.copy(unSaved = false))
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//
+//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
+//            dao.removeById(body.id)
+//
+//            r = data.value!!.first()
+//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
+//
+//            dao.insert(PostEntity.fromDto(body))
+//
+//            r = data.value!!.first()
+//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
+//
+            getAll()
+           //   dao.updateContentById(body.id, body.unSaved)
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw MyUnknownError
+        }
+    }
+
+    suspend fun savePost(post: Post) {
+        dao.insert(PostEntity.fromDto(post))
+        syncOnePost(post)
+    }
+
+    override suspend fun syncOnePost(post: Post) {
+        try {
+            Log.d("MyLog", "id post(syncOnePost) = ${post.id}")
             val response = PostsApi.service.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            val body =
+                response.body() ?: throw ApiError(response.code(), response.message())
+            Log.d("MyLog", "id body(syncOnePost)=${body.id}")
+            dao.removeById(post.id)
             dao.insert(PostEntity.fromDto(body))
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
             throw MyUnknownError
+        }
+    }
+
+    override suspend fun syncPost(list: List<Post>) {
+
+        for (item in list) {
+            try {
+                Log.d("MyLog", "id item = ${item.id}")
+                val response = PostsApi.service.save(item)
+                if (!response.isSuccessful) {
+                    throw ApiError(response.code(), response.message())
+                }
+                val body =
+                    response.body() ?: throw ApiError(response.code(), response.message())
+                Log.d("MyLog", "id body=${body.id}")
+                dao.removeById(item.id)
+                dao.insert(PostEntity.fromDto(body))
+            } catch (e: IOException) {
+                throw NetworkError
+            } catch (e: Exception) {
+                throw MyUnknownError
+            }
         }
     }
 
@@ -85,7 +149,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 dao.insert(PostEntity.fromDto(post))
                 throw ApiError(response.code(), response.message())
             }
-           // val body = response.body() ?: throw ApiError(response.code(), response.message())
+            // val body = response.body() ?: throw ApiError(response.code(), response.message())
 
         } catch (e: IOException) {
             dao.insert(PostEntity.fromDto(post))
@@ -97,14 +161,17 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun likeById(post: Post) {
-      dao.likeById(post.id)
+        dao.likeById(post.id)
         try {
-            val response = if(!post.likedByMe) PostsApi.service.likeById(post.id) else PostsApi.service.dislikeById(post.id)
+            val response =
+                if (!post.likedByMe) PostsApi.service.likeById(post.id) else PostsApi.service.dislikeById(
+                    post.id
+                )
             if (!response.isSuccessful) {
                 dao.likeById(post.id)
                 throw ApiError(response.code(), response.message())
             }
-           //  val body = response.body() ?: throw ApiError(response.code(), response.message())
+            //  val body = response.body() ?: throw ApiError(response.code(), response.message())
 
         } catch (e: IOException) {
             dao.likeById(post.id)

@@ -14,6 +14,7 @@ import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.util.SingleLiveEvent
+import java.util.Locale.filter
 
 
 private val empty = Post(
@@ -26,7 +27,8 @@ private val empty = Post(
     likes = 0,
     shares = 0,
     watches = 0,
-   // videoUrl = "no_video"
+    videoUrl = null,
+    unSaved = true
 )
 
 
@@ -92,6 +94,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch {
                 try {
                     repository.save(it)
+                //    repository.syncOnePost(it)
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = true)
@@ -100,6 +103,33 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         edited.value = empty
+    }
+
+    fun syncPost() {
+        viewModelScope.launch {
+            try {
+                val listUnSaved = data.value?.posts
+                ?.filter {it.unSaved}
+                .orEmpty()
+                _dataState.value = FeedModelState(loading = true)
+                repository.syncPost(listUnSaved)
+                _dataState.value = FeedModelState()
+            } catch (e:Exception) {
+                _dataState.value = FeedModelState(error = true)
+            }
+        }
+    }
+
+    fun syncOnePost(post: Post) {
+        viewModelScope.launch {
+            try {
+                _dataState.value = FeedModelState(loading = true)
+                repository.syncOnePost(post)
+                _dataState.value = FeedModelState()
+            } catch (e:Exception) {
+                _dataState.value = FeedModelState(error = true)
+            }
+        }
     }
 
 //    fun loadPosts() {
