@@ -5,6 +5,9 @@ import androidx.lifecycle.map
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 //import okhttp3.Call
 //import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -24,6 +27,7 @@ import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.MyUnknownError
 import ru.netology.nmedia.error.NetworkError
 
@@ -40,7 +44,11 @@ import ru.netology.nmedia.error.NetworkError
 //    }
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
-    override val data = dao.getAll().map(List<PostEntity>::toDto)
+  //  override val data = dao.getAll().map(List<PostEntity>::toDto)
+
+    override val data = dao.getAll()
+        .map(List<PostEntity>::toDto)
+        .flowOn(Dispatchers.Default)
 
     override suspend fun getAll() {
         try {
@@ -50,7 +58,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
+       //     println("body getAll PostRepoImpl: $body")
             dao.insert(body.toEntity())
+
             // dao.isEmpty()
         } catch (e: IOException) {
             throw NetworkError
@@ -58,6 +68,27 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             throw MyUnknownError
         }
     }
+
+    override fun getNewerCount(id: Long): Flow<Int> = flow {
+        while (true) {
+            delay(10_000L)
+            val response = PostsApi.service.getNewer(id)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            println("body1 $body")
+            body.onEach {
+                it.hidden=true
+            }
+            println("body2 $body")
+            dao.insert(body.toEntity())
+            emit(body.size)
+        }
+    }
+        .catch { e -> throw AppError.from(e) }
+        .flowOn(Dispatchers.Default)
 
     //  suspend fun checkIsEmpty() = dao.isEmpty()
 
@@ -180,6 +211,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             dao.likeById(post.id)
             throw MyUnknownError
         }
+    }
+
+    override suspend fun changeHidden() {
+        dao.updateHiddenAll()
     }
 //    override fun getAllAsync(callback: PostRepository.Callback<List<Post>>) {
 //

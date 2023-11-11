@@ -1,15 +1,19 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.CurrentPostFragment.Companion.textArgument
@@ -121,6 +125,33 @@ class FeedFragment : Fragment() {
             }
 
             binding.emptyText.isVisible = state.empty
+        }
+
+        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+            if(state!=0) {
+                binding.newPost.isEnabled = true
+                binding.buttonNewPosts.visibility = View.VISIBLE
+                binding.newPost.text = state.toString()
+            } else {
+                binding.newPost.isEnabled = false
+                binding.buttonNewPosts.visibility = View.GONE
+                binding.newPost.text = ""
+            }
+            println(state)
+        }
+
+        binding.newPost.setOnClickListener {
+            binding.newPost.text = ""
+            binding.buttonNewPosts.visibility = View.GONE
+            binding.newPost.isEnabled = false
+            viewModel.changeHidden()
+        }
+
+        binding.buttonNewPosts.setOnClickListener {
+            binding.newPost.text = ""
+            binding.buttonNewPosts.visibility = View.GONE
+            binding.newPost.isEnabled = false
+            viewModel.changeHidden()
         }
 
         binding.swipeRW.setOnRefreshListener {

@@ -18,14 +18,15 @@ data class PostEntity(
     val shares: Int = 0,
     val watches: Int = 0,
     val videoUrl:String? = null,
-    val unSaved:Boolean = true
+    var unSaved:Boolean = true,
+    var hidden:Boolean = false
   //  val attachment: Attachment? = null
 ) {
-    fun toDto() = Post(id, author, content, authorAvatar, published, likedByMe, likes,shares,watches, videoUrl, unSaved)
+    fun toDto() = Post(id, author, content, authorAvatar, published, likedByMe, likes,shares,watches, videoUrl, unSaved, hidden)
 
     companion object {
         fun fromDto(dto: Post) =
-            PostEntity(dto.id, dto.author, dto.content, dto.authorAvatar, dto.published, dto.likedByMe, dto.likes, dto.shares, dto.watches, dto.videoUrl, dto.unSaved)
+            PostEntity(dto.id, dto.author, dto.content, dto.authorAvatar, dto.published, dto.likedByMe, dto.likes, dto.shares, dto.watches, dto.videoUrl, dto.unSaved, dto.hidden)
 
     }
 }
