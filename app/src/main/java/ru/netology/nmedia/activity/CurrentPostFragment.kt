@@ -64,7 +64,7 @@ class CurrentPostFragment : Fragment() {
                     }
 
                     override fun remove(post: Post) {
-                        viewModel.removeById(post.id)
+                        viewModel.removeById(post)
                         findNavController()
                             .navigate(
                                 R.id.action_currentPostFragment_to_feedFragment
