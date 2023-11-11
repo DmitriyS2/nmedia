@@ -29,6 +29,8 @@ class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
 
+    lateinit var binding:FragmentFeedBinding
+
 //    private val viewModel: PostViewModel by viewModels(
 //        ownerProducer = ::requireParentFragment
 //    )
@@ -38,7 +40,7 @@ class FeedFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentFeedBinding.inflate(
+        binding = FragmentFeedBinding.inflate(
             inflater,
             container,
             false
@@ -128,10 +130,12 @@ class FeedFragment : Fragment() {
         }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
-            if(state!=0) {
+            viewModel.count +=state
+
+            if(viewModel.count!=0) {
                 binding.newPost.isEnabled = true
                 binding.buttonNewPosts.visibility = View.VISIBLE
-                binding.newPost.text = state.toString()
+                binding.newPost.text = viewModel.count.toString()
             } else {
                 binding.newPost.isEnabled = false
                 binding.buttonNewPosts.visibility = View.GONE
@@ -141,18 +145,19 @@ class FeedFragment : Fragment() {
         }
 
         binding.newPost.setOnClickListener {
-            binding.newPost.text = ""
-            binding.buttonNewPosts.visibility = View.GONE
-            binding.newPost.isEnabled = false
-            viewModel.changeHidden()
+//            viewModel.count=0
+//            binding.newPost.text = ""
+//            binding.buttonNewPosts.visibility = View.GONE
+//            binding.newPost.isEnabled = false
+//            viewModel.changeHidden()
+            showNewPost()
         }
 
         binding.buttonNewPosts.setOnClickListener {
-            binding.newPost.text = ""
-            binding.buttonNewPosts.visibility = View.GONE
-            binding.newPost.isEnabled = false
-            viewModel.changeHidden()
+            showNewPost()
         }
+
+
 
         binding.swipeRW.setOnRefreshListener {
             viewModel.refreshPosts()
@@ -189,6 +194,14 @@ class FeedFragment : Fragment() {
 //            }
 //        }
         return binding.root
+    }
+
+    fun showNewPost() {
+        viewModel.count=0
+        binding.newPost.text = ""
+        binding.buttonNewPosts.visibility = View.GONE
+        binding.newPost.isEnabled = false
+        viewModel.changeHidden()
     }
 }
 

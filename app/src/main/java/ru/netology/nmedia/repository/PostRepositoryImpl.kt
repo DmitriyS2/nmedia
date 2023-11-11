@@ -58,7 +58,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-       //     println("body getAll PostRepoImpl: $body")
             dao.insert(body.toEntity())
 
             // dao.isEmpty()
@@ -69,14 +68,34 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    override fun getNewerCount(id: Long): Flow<Int> = flow {
+//    override fun getNewerCount(id: Long): Flow<Int> = flow {
+//        while (true) {
+//            delay(10_000L)
+//            val response = PostsApi.service.getNewer(id)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            println("body1 $body")
+//            body.onEach {
+//                it.hidden=true
+//            }
+//            println("body2 $body")
+//            dao.insert(body.toEntity())
+//            emit(body.size)
+//        }
+//    }
+//        .catch { e -> throw AppError.from(e) }
+//        .flowOn(Dispatchers.Default)
+
+    override fun getNewerCount(): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = PostsApi.service.getNewer(id)
+            val response = PostsApi.service.getNewer(getCount())
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             println("body1 $body")
             body.onEach {
@@ -89,6 +108,8 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
         .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
+
+    override suspend fun getCount(): Long = dao.count()
 
     //  suspend fun checkIsEmpty() = dao.isEmpty()
 
@@ -103,21 +124,11 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-//            val body = response.body() ?: throw ApiError(response.code(), response.message())
-//
-//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-//            dao.removeById(body.id)
-//
-//            r = data.value!!.first()
-//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-//
-//            dao.insert(PostEntity.fromDto(body))
-//
-//            r = data.value!!.first()
-//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-//
-            getAll()
-           //   dao.updateContentById(body.id, body.unSaved)
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+
+        //    getAll()
+            println("body.id=${body.id}, body.unSaved=${body.unSaved}, body.hidden=${body.hidden}")
+              dao.updateUnSavedById(body.id, body.unSaved, body.authorAvatar)
 
         } catch (e: IOException) {
             throw NetworkError
@@ -126,10 +137,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    suspend fun savePost(post: Post) {
-        dao.insert(PostEntity.fromDto(post))
-        syncOnePost(post)
-    }
+//    suspend fun savePost(post: Post) {
+//        dao.insert(PostEntity.fromDto(post))
+//        syncOnePost(post)
+//    }
 
     override suspend fun syncOnePost(post: Post) {
         try {

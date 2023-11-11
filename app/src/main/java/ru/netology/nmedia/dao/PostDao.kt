@@ -18,7 +18,7 @@ interface PostDao {
     suspend fun isEmpty(): Boolean
 
     @Query("SELECT COUNT(*) FROM PostEntity")
-    suspend fun count(): Int
+    suspend fun count(): Long
 
     @Query("SELECT COUNT(id) FROM PostEntity WHERE hidden=0")
     suspend fun countHidden(): Int
@@ -53,10 +53,11 @@ interface PostDao {
 
     @Query(
         """UPDATE PostEntity SET 
-                unSaved = :unSaved               
+                unSaved = :unSaved, 
+                authorAvatar = :authorAva              
                 WHERE id = :id"""
     )
-    fun updateUnSavedById(id: Long, unSaved: Boolean)
+    suspend fun updateUnSavedById(id: Long, unSaved: Boolean, authorAva:String)
 
     @Query(
         """UPDATE PostEntity 

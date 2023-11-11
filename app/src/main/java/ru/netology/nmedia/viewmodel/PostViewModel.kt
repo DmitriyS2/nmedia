@@ -34,7 +34,8 @@ private val empty = Post(
     shares = 0,
     watches = 0,
     videoUrl = null,
-    unSaved = true
+    unSaved = true,
+    hidden = false
 )
 
 
@@ -54,11 +55,28 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val dataState: LiveData<FeedModelState>
         get() = _dataState
 
+//    val newerCount: LiveData<Int> = data.switchMap {
+//        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+//            .catch { e -> e.printStackTrace() }
+//            .asLiveData(Dispatchers.Default)
+//    }
+    var count:Int = 0
+
     val newerCount: LiveData<Int> = data.switchMap {
-        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+        repository.getNewerCount ()
             .catch { e -> e.printStackTrace() }
             .asLiveData(Dispatchers.Default)
     }
+
+
+
+//   suspend fun getC():Long = viewModelScope.launch {
+//            repository.getCount()
+//        }
+
+
+
+
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
