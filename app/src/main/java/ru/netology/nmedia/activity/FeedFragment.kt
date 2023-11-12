@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -39,6 +40,7 @@ class FeedFragment : Fragment() {
 //        ownerProducer = ::requireParentFragment
 //    )
 
+    @SuppressLint("ResourceAsColor")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -136,12 +138,15 @@ class FeedFragment : Fragment() {
 
             if(state!=0) {
              //   binding.newPost.setBackgroundColor(resources.getColor(R.color.red, null))
-                binding.newPost.setBackgroundColor(Color.parseColor("#FF0000"))
+                binding.newPost.setIconTintResource(R.color.red)
+            //    binding.newPost.setBackgroundColor(Color.parseColor("#FF0000"))
                 binding.newPost.isEnabled = true
                 binding.buttonNewPosts.visibility = View.VISIBLE
+            //    binding.newPost.setTextColor(R.color.red)
                 binding.newPost.text = state.toString()
             } else {
-                binding.newPost.setBackgroundColor(resources.getColor(R.color.purple_700, null))
+                binding.newPost.setIconTintResource(R.color.purple_700)
+            //    binding.newPost.setBackgroundColor(resources.getColor(R.color.purple_700, null))
                 binding.newPost.isEnabled = false
                 binding.buttonNewPosts.visibility = View.GONE
                 binding.newPost.text = ""
@@ -203,6 +208,8 @@ class FeedFragment : Fragment() {
 
     fun showNewPost() {
   //      viewModel.newerCount=0
+        binding.newPost.setIconTintResource(R.color.purple_700)
+
         binding.newPost.text = ""
         binding.buttonNewPosts.visibility = View.GONE
         binding.newPost.isEnabled = false
