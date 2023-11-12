@@ -60,7 +60,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //            .catch { e -> e.printStackTrace() }
 //            .asLiveData(Dispatchers.Default)
 //    }
-    var count:Int = 0
+
+//    var count:Int = 0
+//
+//    fun getHiddenCount() = viewModelScope.launch {
+//        try {
+//            count = repository.getHiddenCount()
+//        } catch (e: Exception) {
+//            _dataState.value = FeedModelState(error = true)
+//        }
+//    }
+
 
     val newerCount: LiveData<Int> = data.switchMap {
         repository.getNewerCount ()

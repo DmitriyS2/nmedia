@@ -60,11 +60,28 @@ interface PostDao {
     suspend fun updateUnSavedById(id: Long, unSaved: Boolean, authorAva:String)
 
     @Query(
+        """UPDATE PostEntity SET 
+                            author = :author,
+                            authorAvatar = :authorAvatar,
+                            content = :content,
+                            published = :published,
+                unSaved = :unSaved
+                WHERE id = :id"""
+    )
+    suspend fun updateUnSavedByPost(id: Long, author:String, authorAvatar:String, content:String, published:String, unSaved: Boolean)
+
+    @Query(
         """UPDATE PostEntity 
             SET hidden = 0              
         """
     )
     suspend fun updateHiddenAll()
+
+    @Query("SELECT MAX(id) FROM PostEntity")
+    suspend fun getMaxId(): Long?
+
+    @Query("SELECT COUNT(*) FROM PostEntity WHERE hidden = 1")
+    suspend fun getHiddenCount(): Int
 
 }
 
