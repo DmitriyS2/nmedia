@@ -9,11 +9,17 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import androidx.lifecycle.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.util.SingleLiveEvent
+import kotlin.coroutines.EmptyCoroutineContext
 import java.util.Locale.filter
 
 
@@ -38,10 +44,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
 
-    val data: LiveData<FeedModel> = repository.data.map(::FeedModel)
+//    val data: LiveData<FeedModel> = repository.data.map(::FeedModel)
+
+    val data: LiveData<FeedModel> = repository.data
+        .map(::FeedModel)
+        .asLiveData(Dispatchers.Default, 100)
+
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
+
+    val newerCount: LiveData<Int> = data.switchMap {
+        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+            .catch { e -> e.printStackTrace() }
+            .asLiveData(Dispatchers.Default)
+    }
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -80,6 +97,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(refreshing = true)
+         //   repository.changeHidden()
             repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
@@ -105,14 +123,26 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = empty
     }
 
-    fun syncPost() {
+//    fun syncPost() {
+//        viewModelScope.launch {
+//            try {
+//                val listUnSaved = data.value?.posts
+//                ?.filter {it.unSaved}
+//                .orEmpty()
+//                _dataState.value = FeedModelState(loading = true)
+//                repository.syncPost(listUnSaved)
+//                _dataState.value = FeedModelState()
+//            } catch (e:Exception) {
+//                _dataState.value = FeedModelState(error = true)
+//            }
+//        }
+//    }
+
+    fun syncOnePost(post: Post) {
         viewModelScope.launch {
             try {
-                val listUnSaved = data.value?.posts
-                ?.filter {it.unSaved}
-                .orEmpty()
                 _dataState.value = FeedModelState(loading = true)
-                repository.syncPost(listUnSaved)
+                repository.syncOnePost(post)
                 _dataState.value = FeedModelState()
             } catch (e:Exception) {
                 _dataState.value = FeedModelState(error = true)
@@ -120,11 +150,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun syncOnePost(post: Post) {
+    fun changeHidden() {
         viewModelScope.launch {
             try {
                 _dataState.value = FeedModelState(loading = true)
-                repository.syncOnePost(post)
+                repository.changeHidden()
                 _dataState.value = FeedModelState()
             } catch (e:Exception) {
                 _dataState.value = FeedModelState(error = true)
