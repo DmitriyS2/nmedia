@@ -1,27 +1,16 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
-import androidx.lifecycle.map
-import com.bumptech.glide.Glide
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 //import okhttp3.Call
 //import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 //import okhttp3.Response
 import ru.netology.nmedia.dto.Post
 import okhttp3.*
 import ru.netology.nmedia.api.PostsApi
 import java.io.IOException
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
@@ -58,7 +47,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-       //     println("body getAll PostRepoImpl: $body")
             dao.insert(body.toEntity())
 
             // dao.isEmpty()
@@ -69,14 +57,34 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    override fun getNewerCount(id: Long): Flow<Int> = flow {
+//    override fun getNewerCount(id: Long): Flow<Int> = flow {
+//        while (true) {
+//            delay(10_000L)
+//            val response = PostsApi.service.getNewer(id)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            println("body1 $body")
+//            body.onEach {
+//                it.hidden=true
+//            }
+//            println("body2 $body")
+//            dao.insert(body.toEntity())
+//            emit(body.size)
+//        }
+//    }
+//        .catch { e -> throw AppError.from(e) }
+//        .flowOn(Dispatchers.Default)
+
+    override fun getNewerCount(): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = PostsApi.service.getNewer(id)
+            val response = PostsApi.service.getNewer(dao.getMaxId() ?: 0L)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             println("body1 $body")
             body.onEach {
@@ -84,40 +92,34 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
             println("body2 $body")
             dao.insert(body.toEntity())
-            emit(body.size)
+      //      emit(body.size)
+            emit(dao.getHiddenCount())
         }
     }
         .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
 
+ //   override suspend fun getCount(): Long = dao.count()
+
     //  suspend fun checkIsEmpty() = dao.isEmpty()
+//    override suspend fun getHiddenCount():Int {
+//        return dao.getHiddenCount()
+//    }
 
     override suspend fun save(post: Post) {
-
          dao.insert(PostEntity.fromDto(post))
-//        var r = data.value!!.first()
-//        Log.d("MyLog", "id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-
         try {
             val response = PostsApi.service.save(post.copy(unSaved = false))
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-//            val body = response.body() ?: throw ApiError(response.code(), response.message())
-//
-//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-//            dao.removeById(body.id)
-//
-//            r = data.value!!.first()
-//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-//
-//            dao.insert(PostEntity.fromDto(body))
-//
-//            r = data.value!!.first()
-//            Log.d("MyLog", "unsaved=${body.unSaved}, id body = ${body.id}, id post = ${post.id}, data size = ${data.value?.size}, id=${r.id}, text=${r.content}")
-//
-            getAll()
-           //   dao.updateContentById(body.id, body.unSaved)
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+
+        //    getAll()
+            println("body.id=${body.id}, body.unSaved=${body.unSaved}, body.hidden=${body.hidden}")
+         //     dao.updateUnSavedById(body.id, body.unSaved, body.authorAvatar)
+            dao.updateUnSavedByPost(body.id, body.author, body.authorAvatar, body.content, body.published, body.unSaved)
+        //    dao.insert(PostEntity.fromDto(body))
 
         } catch (e: IOException) {
             throw NetworkError
@@ -126,15 +128,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    suspend fun savePost(post: Post) {
-        dao.insert(PostEntity.fromDto(post))
-        syncOnePost(post)
-    }
-
     override suspend fun syncOnePost(post: Post) {
         try {
             Log.d("MyLog", "id post(syncOnePost) = ${post.id}")
-            val response = PostsApi.service.save(post)
+            val response = PostsApi.service.save(post.copy(id=0L)) //На сервере уже может быть пост с таким id, поэтому передаём как новый
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -216,7 +213,8 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun changeHidden() {
         dao.updateHiddenAll()
     }
-//    override fun getAllAsync(callback: PostRepository.Callback<List<Post>>) {
+
+    //    override fun getAllAsync(callback: PostRepository.Callback<List<Post>>) {
 //
 //        PostsApi.retrofitService.getAll()
 //            .enqueue(object : Callback<List<Post>> {

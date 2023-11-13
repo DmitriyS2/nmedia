@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -8,12 +9,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.getColor
+//import androidx.core.app.NotificationCompat.getColor
+//import androidx.core.content.res.ResourcesCompat.getColor
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
+//import com.google.android.material.color.MaterialColors.getColor
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.CurrentPostFragment.Companion.textArgument
@@ -29,16 +34,19 @@ class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
 
+    lateinit var binding:FragmentFeedBinding
+
 //    private val viewModel: PostViewModel by viewModels(
 //        ownerProducer = ::requireParentFragment
 //    )
 
+    @SuppressLint("ResourceAsColor")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentFeedBinding.inflate(
+        binding = FragmentFeedBinding.inflate(
             inflater,
             container,
             false
@@ -123,16 +131,22 @@ class FeedFragment : Fragment() {
                     binding.list.smoothScrollToPosition(0)
                 }
             }
-
             binding.emptyText.isVisible = state.empty
         }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+
             if(state!=0) {
+             //   binding.newPost.setBackgroundColor(resources.getColor(R.color.red, null))
+                binding.newPost.setIconTintResource(R.color.red)
+            //    binding.newPost.setBackgroundColor(Color.parseColor("#FF0000"))
                 binding.newPost.isEnabled = true
                 binding.buttonNewPosts.visibility = View.VISIBLE
+            //    binding.newPost.setTextColor(R.color.red)
                 binding.newPost.text = state.toString()
             } else {
+                binding.newPost.setIconTintResource(R.color.purple_700)
+            //    binding.newPost.setBackgroundColor(resources.getColor(R.color.purple_700, null))
                 binding.newPost.isEnabled = false
                 binding.buttonNewPosts.visibility = View.GONE
                 binding.newPost.text = ""
@@ -141,18 +155,19 @@ class FeedFragment : Fragment() {
         }
 
         binding.newPost.setOnClickListener {
-            binding.newPost.text = ""
-            binding.buttonNewPosts.visibility = View.GONE
-            binding.newPost.isEnabled = false
-            viewModel.changeHidden()
+//            viewModel.count=0
+//            binding.newPost.text = ""
+//            binding.buttonNewPosts.visibility = View.GONE
+//            binding.newPost.isEnabled = false
+//            viewModel.changeHidden()
+            showNewPost()
         }
 
         binding.buttonNewPosts.setOnClickListener {
-            binding.newPost.text = ""
-            binding.buttonNewPosts.visibility = View.GONE
-            binding.newPost.isEnabled = false
-            viewModel.changeHidden()
+            showNewPost()
         }
+
+
 
         binding.swipeRW.setOnRefreshListener {
             viewModel.refreshPosts()
@@ -189,6 +204,16 @@ class FeedFragment : Fragment() {
 //            }
 //        }
         return binding.root
+    }
+
+    fun showNewPost() {
+  //      viewModel.newerCount=0
+        binding.newPost.setIconTintResource(R.color.purple_700)
+
+        binding.newPost.text = ""
+        binding.buttonNewPosts.visibility = View.GONE
+        binding.newPost.isEnabled = false
+        viewModel.changeHidden()
     }
 }
 
