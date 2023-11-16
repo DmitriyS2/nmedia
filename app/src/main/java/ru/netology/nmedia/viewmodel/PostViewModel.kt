@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -16,9 +17,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.util.SingleLiveEvent
+import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
 import java.util.Locale.filter
 
@@ -38,6 +42,7 @@ private val empty = Post(
     hidden = false
 )
 
+private val noPhoto = PhotoModel()
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -73,26 +78,19 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 
     val newerCount: LiveData<Int> = data.switchMap {
-        repository.getNewerCount ()
+        repository.getNewerCount()
             .catch { e -> e.printStackTrace() }
             .asLiveData(Dispatchers.Default)
     }
 
 
-
-//   suspend fun getC():Long = viewModelScope.launch {
+    //   suspend fun getC():Long = viewModelScope.launch {
 //            repository.getCount()
 //        }
-
-
-
-
-
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
-
 
 //    private val _data = MutableLiveData(FeedModel())
 //    val data: LiveData<FeedModel>
@@ -101,6 +99,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //    private val _postCreated = SingleLiveEvent<Unit>()
 //    val postCreated: LiveData<Unit>
 //        get() = _postCreated
+
+    private val _photo = MutableLiveData(noPhoto)
+    val photo: LiveData<PhotoModel>
+        get() = _photo
 
     init {
         loadPosts()
@@ -114,7 +116,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
-           // Toast.makeText(getApplication(), "Не удалось скачать посты.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(getApplication(), "Не удалось скачать посты.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -125,30 +127,54 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(refreshing = true)
-         //   repository.changeHidden()
+            //   repository.changeHidden()
             repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
-           // Toast.makeText(getApplication(), "Не удалось обновить посты.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(getApplication(), "Не удалось обновить посты.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
         }
     }
 
+    //    fun save() {
+//        edited.value?.let {
+//            _postCreated.value = Unit
+//            viewModelScope.launch {
+//                try {
+//                    repository.save(it)
+//                //    repository.syncOnePost(it)
+//                    _dataState.value = FeedModelState()
+//                } catch (e: Exception) {
+//                    _dataState.value = FeedModelState(error = true)
+//
+//                }
+//            }
+//        }
+//        edited.value = empty
+//    }
     fun save() {
         edited.value?.let {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    repository.save(it)
-                //    repository.syncOnePost(it)
+                    when (_photo.value) {
+                        noPhoto -> repository.save(it)
+                        else -> _photo.value?.file?.let { file ->
+                            repository.saveWithAttachment(it, MediaUpload(file))
+                        }
+                    }
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = true)
-
                 }
             }
         }
         edited.value = empty
+        _photo.value = noPhoto
+    }
+
+    fun changePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
     }
 
 //    fun syncPost() {
@@ -172,7 +198,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _dataState.value = FeedModelState(loading = true)
                 repository.syncOnePost(post)
                 _dataState.value = FeedModelState()
-            } catch (e:Exception) {
+            } catch (e: Exception) {
                 _dataState.value = FeedModelState(error = true)
             }
         }
@@ -184,7 +210,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _dataState.value = FeedModelState(loading = true)
                 repository.changeHidden()
                 _dataState.value = FeedModelState()
-            } catch (e:Exception) {
+            } catch (e: Exception) {
                 _dataState.value = FeedModelState(error = true)
             }
         }
@@ -377,7 +403,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //        }
 //    }
 
-    fun removeById(post:Post) {
+    fun removeById(post: Post) {
         viewModelScope.launch {
             try {
                 _dataState.value = FeedModelState(loading = true)

@@ -17,6 +17,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.CounterView.createCount
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.view.load
 
 
 interface OnInteractionListener {
@@ -28,6 +29,8 @@ interface OnInteractionListener {
     fun goToPost(post: Post)
     fun syncPost()
     fun syncOnePost(post: Post)
+
+    fun goToPhoto(id: Long)
 }
 
 class PostsAdapter(
@@ -64,7 +67,8 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
-            Glide.with (avatar)
+
+            Glide.with(avatar)
                 .load("http://192.168.1.10:9999/avatars/${post.authorAvatar}")
                 .placeholder(R.drawable.baseline_emoji_emotions_24)
                 .error(R.drawable.remove_red_eye_24)
@@ -72,13 +76,15 @@ class PostViewHolder(
                 .circleCrop()
                 .into(avatar)
 
-            if (post.videoUrl!=null) {
+            photoImage.load("http://192.168.1.10:9999/media/${post.attachment?.url}")
+
+            if (post.videoUrl != null) {
                 groupVideo.visibility = View.VISIBLE
-            } else{
+            } else {
                 groupVideo.visibility = View.GONE
             }
 
-            if(post.unSaved) {
+            if (post.unSaved) {
                 unSavedPost.visibility = View.VISIBLE
             } else {
                 unSavedPost.visibility = View.GONE
@@ -104,18 +110,28 @@ class PostViewHolder(
                 onInteractionListener.showVideo(post)
             }
             like.setOnClickListener {
-                if(!post.unSaved) {
+                if (!post.unSaved) {
                     onInteractionListener.like(post)
                 }
             }
             share.setOnClickListener {
-                if(!post.unSaved) {
+                if (!post.unSaved) {
                     onInteractionListener.share(post)
                 }
             }
             groupPost.setAllOnClickListener {
                 Log.d("MyLog", "groupPost ${post.id}")
                 onInteractionListener.goToPost(post)
+            }
+
+            if (post.attachment != null) {
+                photoImage.visibility = View.VISIBLE
+            } else {
+                photoImage.visibility = View.GONE
+            }
+
+            photoImage.setOnClickListener {
+                onInteractionListener.goToPhoto(post.id)
             }
 
             menu.setOnClickListener {

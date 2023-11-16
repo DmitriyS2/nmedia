@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -9,6 +10,7 @@ import retrofit2.http.*
 import ru.netology.nmedia.dto.Post
 import retrofit2.Response
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.dto.Media
 
 
 
@@ -51,6 +53,10 @@ interface PostsApiService {
 
     @DELETE("posts/{id}/likes")
     suspend fun dislikeById(@Path("id") id: Long): Response<Post>
+
+    @Multipart
+    @POST("media")
+    suspend fun upload(@Part media: MultipartBody.Part): Response<Media>
 }
 
 //interface PostsApiService {
