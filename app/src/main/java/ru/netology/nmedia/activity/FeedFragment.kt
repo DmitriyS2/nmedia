@@ -9,16 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getColor
-//import androidx.core.app.NotificationCompat.getColor
-//import androidx.core.content.res.ResourcesCompat.getColor
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
-//import com.google.android.material.color.MaterialColors.getColor
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.CurrentPostFragment.Companion.textArgument
@@ -109,6 +103,14 @@ class FeedFragment : Fragment() {
                // viewModel.syncPost()
                 viewModel.syncOnePost(post)
             }
+
+            override fun goToPhoto(id: Long) {
+                findNavController()
+                    .navigate(R.id.action_feedFragment_to_currentPhotoFragment,
+                        Bundle().apply {
+                            textArgument = id.toString()
+                        })
+            }
         })
 
 
@@ -137,8 +139,7 @@ class FeedFragment : Fragment() {
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
 
             if(state!=0) {
-             //   binding.newPost.setBackgroundColor(resources.getColor(R.color.red, null))
-                binding.newPost.setIconTintResource(R.color.red)
+                  binding.newPost.setIconTintResource(R.color.red)
             //    binding.newPost.setBackgroundColor(Color.parseColor("#FF0000"))
                 binding.newPost.isEnabled = true
                 binding.buttonNewPosts.visibility = View.VISIBLE
@@ -155,7 +156,6 @@ class FeedFragment : Fragment() {
         }
 
         binding.newPost.setOnClickListener {
-//            viewModel.count=0
 //            binding.newPost.text = ""
 //            binding.buttonNewPosts.visibility = View.GONE
 //            binding.newPost.isEnabled = false

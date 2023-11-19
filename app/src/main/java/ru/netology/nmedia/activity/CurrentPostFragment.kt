@@ -98,6 +98,14 @@ class CurrentPostFragment : Fragment() {
 
                     }
 
+                    override fun goToPhoto(id: Long) {
+                        findNavController()
+                            .navigate(R.id.action_currentPostFragment_to_currentPhotoFragment,
+                                Bundle().apply {
+                                    textArg = id.toString()
+                                })
+                    }
+
 
                 }).bind(it) //вызываем метод bind у PostViewHolder
             }
