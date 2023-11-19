@@ -2,13 +2,11 @@ package ru.netology.nmedia.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,12 +19,15 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
+
+    private  val authViewModel:AuthViewModel by activityViewModels()
 
     lateinit var binding:FragmentFeedBinding
 
@@ -49,7 +50,13 @@ class FeedFragment : Fragment() {
         val adapter = PostsAdapter(object : OnInteractionListener {
 
             override fun like(post: Post) {
-                viewModel.likeById(post)
+                if(authViewModel.authenticated) {
+                    viewModel.likeById(post)
+                } else {
+                    mustSignIn()
+             //       post =post.copy(likedByMe = !post.likedByMe)
+                }
+
             }
 
             override fun share(post: Post) {
@@ -184,7 +191,12 @@ class FeedFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            if(authViewModel.authenticated) {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            } else {
+                mustSignIn()
+            }
+
         }
 
 //        binding.swipeRW.setOnRefreshListener {
@@ -214,6 +226,12 @@ class FeedFragment : Fragment() {
         binding.buttonNewPosts.visibility = View.GONE
         binding.newPost.isEnabled = false
         viewModel.changeHidden()
+    }
+
+    fun mustSignIn() {
+        val menuDialog = SignInDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In", "Позже")
+        val manager = childFragmentManager
+        menuDialog.show(manager, "Sign in")
     }
 }
 

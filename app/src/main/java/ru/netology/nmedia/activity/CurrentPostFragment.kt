@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
@@ -16,6 +17,7 @@ import ru.netology.nmedia.adapter.PostViewHolder
 import ru.netology.nmedia.databinding.FragmentCurrentPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.StringArg
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
@@ -28,6 +30,8 @@ class CurrentPostFragment : Fragment() {
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
+    private  val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,7 +51,12 @@ class CurrentPostFragment : Fragment() {
             list.posts.find { it.id == currentId }?.let {
                 PostViewHolder(binding.singlePost, object : OnInteractionListener {
                     override fun like(post: Post) {
-                        viewModel.likeById(post)
+                        if(authViewModel.authenticated) {
+                            viewModel.likeById(post)
+                        } else {
+                            mustSignIn()
+                        }
+                   //     viewModel.likeById(post)
                     }
 
                     override fun share(post: Post) {
@@ -191,6 +200,12 @@ class CurrentPostFragment : Fragment() {
 //            }
 //        }
         return binding.root
+    }
+
+    fun mustSignIn() {
+        val menuDialog = SignInDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In", "Позже")
+        val manager = childFragmentManager
+        menuDialog.show(manager, "Sign in")
     }
 }
 
