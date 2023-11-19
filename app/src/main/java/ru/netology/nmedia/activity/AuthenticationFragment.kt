@@ -14,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import ru.netology.nmedia.databinding.FragmentAuthenticationBinding
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.SignInViewModel
 
 
@@ -21,6 +22,8 @@ import ru.netology.nmedia.viewmodel.SignInViewModel
 class AuthenticationFragment : Fragment() {
 
     private val viewModel: SignInViewModel by activityViewModels()
+
+  //  private val authViewModel:AuthViewModel by activityViewModels()
 
     lateinit var binding: FragmentAuthenticationBinding
 
@@ -36,7 +39,8 @@ class AuthenticationFragment : Fragment() {
                viewModel.signIn(binding.login.text.toString(), binding.password.text.toString())
 
 //                runBlocking {
-//                    val response:String = if(viewModel.flagAuth) "Вы вошли как:${binding.login.text.toString()}" else "Ошибка входа"
+//                    delay(1000)
+//                    val response:String = if(authViewModel.authenticated) "Вы вошли как:${binding.login.text.toString()}" else "Ошибка входа"
 //                    Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()
 //                 //   Toast.makeText(activity, "Вы вошли как:${binding.login.text.toString()}", Toast.LENGTH_SHORT).show()
 //                    delay(2000)

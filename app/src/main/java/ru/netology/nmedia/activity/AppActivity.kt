@@ -63,6 +63,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.data.collect {
                     invalidateOptionsMenu()
+
                 }
             }
         }
@@ -82,7 +83,6 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
                 when (menuItem.itemId) {
                     R.id.signin -> {
-                        // TODO: just hardcode it, implementation must be in homework
                         findNavController(R.id.nav_host_fragment)
                             .navigate(R.id.authenticationFragment)
                      //   AppAuth.getInstance().setAuth(5, "x-token")
@@ -104,6 +104,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                     else -> false
                 }
         })
+
     }
 
     private fun requestNotificationsPermission() {
