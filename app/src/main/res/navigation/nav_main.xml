@@ -53,4 +53,9 @@
         android:name="ru.netology.nmedia.activity.CurrentPhotoFragment"
         android:label="fragment_current_photo"
         tools:layout="@layout/fragment_current_photo" />
+    <fragment
+        android:id="@+id/authenticationFragment"
+        android:name="ru.netology.nmedia.activity.AuthenticationFragment"
+        android:label="fragment_authentication"
+        tools:layout="@layout/fragment_authentication" />
 </navigation>

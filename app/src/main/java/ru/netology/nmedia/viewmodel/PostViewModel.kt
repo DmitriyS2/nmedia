@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flatMapLatest
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.model.FeedModel
@@ -29,6 +31,7 @@ import java.util.Locale.filter
 
 private val empty = Post(
     id = 0,
+    authorId = 0,
     content = "",
     author = "",
     authorAvatar = "",
@@ -39,7 +42,9 @@ private val empty = Post(
     watches = 0,
     videoUrl = null,
     unSaved = true,
-    hidden = false
+    hidden = false,
+    attachment = null,
+    ownedByMe = false
 )
 
 private val noPhoto = PhotoModel()
@@ -52,9 +57,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
 //    val data: LiveData<FeedModel> = repository.data.map(::FeedModel)
 
-    val data: LiveData<FeedModel> = repository.data
-        .map(::FeedModel)
-        .asLiveData(Dispatchers.Default, 100)
+//    val data: LiveData<FeedModel> = repository.data
+//        .map(::FeedModel)
+//        .asLiveData(Dispatchers.Default, 100)
+
+    val data: LiveData<FeedModel> = AppAuth.getInstance()
+        .authStateFlow
+        .flatMapLatest { (myId, _) ->
+            repository.data
+                .map { posts ->
+                    FeedModel(
+                        posts.map { it.copy(ownedByMe = it.authorId == myId) },
+                        posts.isEmpty()
+                    )
+                }
+        }.asLiveData(Dispatchers.Default, 100)
 
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
