@@ -91,7 +91,7 @@ class CurrentPhotoFragment : Fragment() {
     }
 
     fun mustSignIn() {
-        val menuDialog = SignInDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In","Позже")
+        val menuDialog = SignInOutDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In","Позже")
         val manager = childFragmentManager
         menuDialog.show(manager, "Sign in")
     }

@@ -5,21 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import ru.netology.nmedia.databinding.FragmentAuthenticationBinding
-import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.SignInViewModel
 
 
 
-class AuthenticationFragment : Fragment() {
+class SignInFragment : Fragment() {
 
     private val viewModel: SignInViewModel by activityViewModels()
 
