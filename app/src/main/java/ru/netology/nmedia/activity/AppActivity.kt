@@ -18,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.material.badge.BadgeDrawable
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
@@ -91,13 +90,14 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
                     R.id.signup -> {
                         // TODO: just hardcode it, implementation must be in homework
+
+
                         AppAuth.getInstance().setAuth(5, "x-token")
                         true
                     }
 
                     R.id.signout -> {
-                        // TODO: just hardcode it, implementation must be in homework
-                        AppAuth.getInstance().removeAuth()
+                       areYouSureSignOut()
                         true
                     }
 
@@ -106,6 +106,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         })
 
     }
+
 
     private fun requestNotificationsPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -138,6 +139,12 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         FirebaseMessaging.getInstance().token.addOnSuccessListener {
             println(it)
         }
+    }
+
+    fun areYouSureSignOut() {
+        val menuDialog = SignInDialogFragment("Выход из аккаунта","Вы уверены, что хотите выйти из системы?", R.drawable.warning_24, "Выйти", "Остаться", false)
+        val manager = supportFragmentManager
+        menuDialog.show(manager, "Sign out")
     }
 
 

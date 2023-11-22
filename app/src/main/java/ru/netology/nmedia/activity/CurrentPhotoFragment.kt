@@ -1,9 +1,6 @@
 package ru.netology.nmedia.activity
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,11 +8,12 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentCurrentPhotoBinding
 import ru.netology.nmedia.dto.CounterView
-import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.view.load
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class CurrentPhotoFragment : Fragment() {
@@ -25,6 +23,8 @@ class CurrentPhotoFragment : Fragment() {
     }
 
     private val viewModel: PostViewModel by activityViewModels()
+
+    private  val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,7 +48,12 @@ class CurrentPhotoFragment : Fragment() {
                     likePhoto.text = CounterView.createCount(currentPost.likes)
 
                     likePhoto.setOnClickListener {
-                        viewModel.likeById(currentPost)
+                        if(authViewModel.authenticated) {
+                            viewModel.likeById(currentPost)
+                        } else {
+                            mustSignIn()
+                        }
+                     //   viewModel.likeById(currentPost)
                     }
 
                     buttonReturn.setOnClickListener {
@@ -83,5 +88,11 @@ class CurrentPhotoFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    fun mustSignIn() {
+        val menuDialog = SignInDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In","Позже")
+        val manager = childFragmentManager
+        menuDialog.show(manager, "Sign in")
     }
 }

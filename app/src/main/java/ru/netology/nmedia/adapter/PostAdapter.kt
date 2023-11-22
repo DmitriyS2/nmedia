@@ -8,6 +8,8 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +20,7 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.CounterView.createCount
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.view.load
+import ru.netology.nmedia.viewmodel.AuthViewModel
 
 
 interface OnInteractionListener {
@@ -52,6 +55,7 @@ class PostViewHolder(
     private val binding: CardPostBinding,
     private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
+
 
     fun Group.setAllOnClickListener(listener: View.OnClickListener?) {
         referencedIds.forEach { id ->
