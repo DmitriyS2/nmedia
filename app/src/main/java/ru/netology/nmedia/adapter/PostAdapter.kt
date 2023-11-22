@@ -68,6 +68,8 @@ class PostViewHolder(
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
 
+            menu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
+
             Glide.with(avatar)
                 .load("http://192.168.1.10:9999/avatars/${post.authorAvatar}")
                 .placeholder(R.drawable.baseline_emoji_emotions_24)
