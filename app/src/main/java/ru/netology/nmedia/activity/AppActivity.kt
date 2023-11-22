@@ -91,7 +91,8 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                     R.id.signup -> {
                         // TODO: just hardcode it, implementation must be in homework
                         findNavController(R.id.nav_host_fragment)
-                            .navigate(R.id.signUpFragment)
+                     //       .navigate(R.id.signUpFragment)
+                            .navigate(R.id.signUpWithPhotoFragment)
 
                       //  AppAuth.getInstance().setAuth(5, "x-token")
                         true

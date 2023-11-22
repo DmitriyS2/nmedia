@@ -63,4 +63,9 @@
         android:name="ru.netology.nmedia.activity.SignUpFragment"
         android:label="fragment_sign_up"
         tools:layout="@layout/fragment_sign_up" />
+    <fragment
+        android:id="@+id/signUpWithPhotoFragment"
+        android:name="ru.netology.nmedia.activity.SignUpWithPhotoFragment"
+        android:label="fragment_sign_up_with_photo"
+        tools:layout="@layout/fragment_sign_up_with_photo" />
 </navigation>
