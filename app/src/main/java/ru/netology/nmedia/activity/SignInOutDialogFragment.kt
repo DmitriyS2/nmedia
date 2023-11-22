@@ -9,7 +9,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentSigninDialogBinding
 
-class SignInDialogFragment(val title: String, val text: String, val icon: Int, val textPosButton:String, val textNegButton:String, val flagSignIn:Boolean = true) : DialogFragment() {
+class SignInOutDialogFragment(val title: String, val text: String, val icon: Int, val textPosButton:String, val textNegButton:String, val flagSignIn:Boolean = true) : DialogFragment() {
     lateinit var binding: FragmentSigninDialogBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

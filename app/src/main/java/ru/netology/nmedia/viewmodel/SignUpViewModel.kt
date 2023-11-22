@@ -10,13 +10,13 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import java.io.IOException
 
-class SignInViewModel : ViewModel() {
+class SignUpViewModel:ViewModel() {
 
-    fun signIn(login: String, password: String) {
+    fun signUp(login: String, password: String, name:String) {
 
         viewModelScope.launch {
             try {
-                val response = PostsApi.service.updateUser(login, password)
+                val response = PostsApi.service.registerUser(login, password, name)
                 if (!response.isSuccessful) {
                     throw ApiError(response.code(), response.message())
                 }
@@ -29,12 +29,10 @@ class SignInViewModel : ViewModel() {
             } catch (e: IOException) {
                 throw NetworkError
             } catch (e: Exception) {
-                Log.d("MyLog", "ошибка signIn")
+                Log.d("MyLog", "ошибка signUp")
                 //  throw MyUnknownError
             }
 
         }
-
     }
-
 }

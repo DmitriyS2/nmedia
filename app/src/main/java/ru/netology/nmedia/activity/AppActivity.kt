@@ -90,9 +90,10 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
                     R.id.signup -> {
                         // TODO: just hardcode it, implementation must be in homework
+                        findNavController(R.id.nav_host_fragment)
+                            .navigate(R.id.signUpFragment)
 
-
-                        AppAuth.getInstance().setAuth(5, "x-token")
+                      //  AppAuth.getInstance().setAuth(5, "x-token")
                         true
                     }
 
@@ -142,7 +143,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     }
 
     fun areYouSureSignOut() {
-        val menuDialog = SignInDialogFragment("Выход из аккаунта","Вы уверены, что хотите выйти из системы?", R.drawable.warning_24, "Выйти", "Остаться", false)
+        val menuDialog = SignInOutDialogFragment("Выход из аккаунта","Вы уверены, что хотите выйти из системы?", R.drawable.warning_24, "Выйти", "Остаться", false)
         val manager = supportFragmentManager
         menuDialog.show(manager, "Sign out")
     }
