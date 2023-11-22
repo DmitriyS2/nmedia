@@ -219,9 +219,7 @@ class FeedFragment : Fragment() {
     }
 
     fun showNewPost() {
-  //      viewModel.newerCount=0
         binding.newPost.setIconTintResource(R.color.purple_700)
-
         binding.newPost.text = ""
         binding.buttonNewPosts.visibility = View.GONE
         binding.newPost.isEnabled = false

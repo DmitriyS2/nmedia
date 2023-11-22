@@ -1,18 +1,37 @@
 package ru.netology.nmedia.viewmodel
 
+import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.dto.Media
+import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.MyUnknownError
 import ru.netology.nmedia.error.NetworkError
+import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
+import java.io.File
 import java.io.IOException
 
-class SignUpViewModel:ViewModel() {
+class SignUpViewModel : ViewModel() {
 
-    fun signUp(login: String, password: String, name:String) {
+    private val _photo = MutableLiveData(noPhoto)
+
+    val photoAvatarUrl: MutableLiveData<String>? = null
+    val photo: LiveData<PhotoModel>
+        get() = _photo
+
+    fun signUp(login: String, password: String, name: String) {
 
         viewModelScope.launch {
             try {
@@ -22,7 +41,7 @@ class SignUpViewModel:ViewModel() {
                 }
                 val body =
                     response.body() ?: throw ApiError(response.code(), response.message())
-                Log.d("MyLog", "id body=${body.id} token body=${body.token}")
+                Log.d("MyLog", "signUp id body=${body.id} token body=${body.token}")
 
                 AppAuth.getInstance().setAuth(body.id, body.token)
 
@@ -32,7 +51,90 @@ class SignUpViewModel:ViewModel() {
                 Log.d("MyLog", "ошибка signUp")
                 //  throw MyUnknownError
             }
-
         }
+    }
+
+    fun save(login: String, password: String, name: String) {
+        viewModelScope.launch {
+            try {
+                when (_photo.value) {
+                    noPhoto -> signUp(login, password, name)
+                    else -> _photo.value?.file?.let { file ->
+                        signUpWithPhoto(login, password, name, MediaUpload(file))
+                    }
+                }
+
+            } catch (e: Exception) {
+                println(e.stackTrace)
+            }
+        }
+        _photo.value = noPhoto
+    }
+
+    fun signUpWithPhoto(login: String, pass: String, name: String, upload: MediaUpload) {
+
+        viewModelScope.launch {
+
+            try {
+            //    photoAvatarUrl = upload(upload)
+
+                val media = MultipartBody.Part.createFormData(
+                    "file", upload.file.name, upload.file.asRequestBody()
+                )
+
+                upload(media)
+
+                val response = PostsApi.service.registerWithPhoto(
+                    login.toRequestBody("text/plain".toMediaType()),
+                    pass.toRequestBody("text/plain".toMediaType()),
+                    name.toRequestBody("text/plain".toMediaType()),
+                    media
+                )
+                if (!response.isSuccessful) {
+                    throw ApiError(response.code(), response.message())
+                }
+                val body =
+                    response.body() ?: throw ApiError(response.code(), response.message())
+                Log.d(
+                    "MyLog",
+                    "signUpWithPhoto id body=${body.id} token body=${body.token}"
+                )
+
+                AppAuth.getInstance().setAuth(body.id, body.token)
+
+            } catch (e: IOException) {
+                throw NetworkError
+            } catch (e: Exception) {
+                Log.d("MyLog", "ошибка signUpWithPhoto")
+                //  throw MyUnknownError
+            }
+            _photo.value = noPhoto
+        }
+    }
+
+    suspend fun upload(media: MultipartBody.Part) {
+        try {
+//            val media = MultipartBody.Part.createFormData(
+//                "file", upload.file.name, upload.file.asRequestBody()
+//            )
+            val response = PostsApi.service.upload(media)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            photoAvatarUrl?.value =
+                response.body()?.id ?: throw ApiError(response.code(), response.message())
+
+       //     return media
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            Log.d("MyLog", "ошибка upload")
+            //  throw MyUnknownError
+        }
+    }
+
+    fun changePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
     }
 }

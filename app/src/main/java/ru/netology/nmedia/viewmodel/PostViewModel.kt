@@ -48,7 +48,7 @@ private val empty = Post(
     ownedByMe = false
 )
 
-private val noPhoto = PhotoModel()
+ val noPhoto = PhotoModel()
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 

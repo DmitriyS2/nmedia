@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignUpBinding
 import ru.netology.nmedia.viewmodel.SignUpViewModel
 
@@ -24,7 +23,7 @@ class SignUpFragment : Fragment() {
 
         binding.buttonSignUp.setOnClickListener {
             if (isFieldNotNull()) {
-                binding.password
+
                 viewModel.signUp(binding.login.text.toString(), binding.password.text.toString(), binding.name.text.toString())
 
                 findNavController().navigateUp()
@@ -63,7 +62,5 @@ class SignUpFragment : Fragment() {
             }
         }
         return flag
-
     }
-
 }
