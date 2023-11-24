@@ -11,14 +11,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.error.ApiError
-import ru.netology.nmedia.error.MyUnknownError
 import ru.netology.nmedia.error.NetworkError
-import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import java.io.File
 import java.io.IOException
@@ -35,7 +32,7 @@ class SignUpViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = PostsApi.service.registerUser(login, password, name)
+                val response = Api.service.registerUser(login, password, name)
                 if (!response.isSuccessful) {
                     throw ApiError(response.code(), response.message())
                 }
@@ -74,17 +71,14 @@ class SignUpViewModel : ViewModel() {
     fun signUpWithPhoto(login: String, pass: String, name: String, upload: MediaUpload) {
 
         viewModelScope.launch {
-
             try {
-            //    photoAvatarUrl = upload(upload)
-
                 val media = MultipartBody.Part.createFormData(
                     "file", upload.file.name, upload.file.asRequestBody()
                 )
 
                 upload(media)
 
-                val response = PostsApi.service.registerWithPhoto(
+                val response = Api.service.registerWithPhoto(
                     login.toRequestBody("text/plain".toMediaType()),
                     pass.toRequestBody("text/plain".toMediaType()),
                     name.toRequestBody("text/plain".toMediaType()),
@@ -117,7 +111,7 @@ class SignUpViewModel : ViewModel() {
 //            val media = MultipartBody.Part.createFormData(
 //                "file", upload.file.name, upload.file.asRequestBody()
 //            )
-            val response = PostsApi.service.upload(media)
+            val response = Api.service.upload(media)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }

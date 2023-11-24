@@ -81,4 +81,6 @@ dependencies {
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2"
     implementation "com.github.dhaval2404:imagepicker:2.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3"
+
 }

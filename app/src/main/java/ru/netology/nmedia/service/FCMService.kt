@@ -17,6 +17,9 @@ import android.content.Intent
 import android.util.Log
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.AppActivity
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.auth.AuthState
+import ru.netology.nmedia.dto.Push
 import kotlin.random.Random
 
 
@@ -41,6 +44,30 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        Log.d("MyLog", "1=${message.data.toString()}")
+        val response = gson.fromJson(message.data[content], Push::class.java)
+        Log.d("MyLog", "2=$response")
+
+        val signInUserId = AppAuth.getInstance().authStateFlow.value.id
+
+        when {
+            response.recipientId==signInUserId -> {
+                handleLike(response.content)
+                Log.d("MyLog", "when1 recId=${response.recipientId} userId=$signInUserId")
+            }
+            (response.recipientId==0L && response.recipientId!=signInUserId) -> {
+                AppAuth.getInstance().sendPushToken()
+                Log.d("MyLog", "when2 recId=${response.recipientId} userId=$signInUserId")
+            }
+            (response.recipientId!=0L && response.recipientId!=signInUserId && response.recipientId!=null) -> {
+                AppAuth.getInstance().sendPushToken()
+                Log.d("MyLog", "when3 recId=${response.recipientId} userId=$signInUserId")
+            }
+            response.recipientId==null -> {
+                handleLike(response.content)
+                Log.d("MyLog", "when4 recId=${response.recipientId} userId=$signInUserId")
+            }
+        }
 
         message.data[action]?.let {
             when (it) {
@@ -74,8 +101,8 @@ class FCMService : FirebaseMessagingService() {
         }
     }
 
-
     override fun onNewToken(token: String) {
+        AppAuth.getInstance().sendPushToken(token)
         println(token)
     }
 

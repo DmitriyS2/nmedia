@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
@@ -16,7 +16,7 @@ class SignInViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = PostsApi.service.updateUser(login, password)
+                val response = Api.service.updateUser(login, password)
                 if (!response.isSuccessful) {
                     throw ApiError(response.code(), response.message())
                 }
