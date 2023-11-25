@@ -68,7 +68,7 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            like.isChecked = post.likedByMe
+         //   like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
             share.text = createCount(post.shares)
 
@@ -116,6 +116,7 @@ class PostViewHolder(
                 onInteractionListener.showVideo(post)
             }
             like.setOnClickListener {
+                like.isChecked = !like.isChecked
                 if (!post.unSaved) {
                     onInteractionListener.like(post)
                 }
