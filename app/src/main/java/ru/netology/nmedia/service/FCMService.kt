@@ -15,19 +15,24 @@ import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
 import android.util.Log
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.AppActivity
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Push
+import javax.inject.Inject
 import kotlin.random.Random
 
-
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "remote"
     private val gson = Gson()
+
+    @Inject
+    lateinit var auth: AppAuth
 
     override fun onCreate() {
         super.onCreate()
@@ -48,7 +53,7 @@ class FCMService : FirebaseMessagingService() {
         val response = gson.fromJson(message.data[content], Push::class.java)
         Log.d("MyLog", "2=$response")
 
-        val signInUserId = AppAuth.getInstance().authStateFlow.value.id
+        val signInUserId = auth.authStateFlow.value.id
 
         when {
             response.recipientId==signInUserId -> {
@@ -56,11 +61,11 @@ class FCMService : FirebaseMessagingService() {
                 Log.d("MyLog", "when1 recId=${response.recipientId} userId=$signInUserId")
             }
             (response.recipientId==0L && response.recipientId!=signInUserId) -> {
-                AppAuth.getInstance().sendPushToken()
+                auth.sendPushToken()
                 Log.d("MyLog", "when2 recId=${response.recipientId} userId=$signInUserId")
             }
             (response.recipientId!=0L && response.recipientId!=signInUserId && response.recipientId!=null) -> {
-                AppAuth.getInstance().sendPushToken()
+                auth.sendPushToken()
                 Log.d("MyLog", "when3 recId=${response.recipientId} userId=$signInUserId")
             }
             response.recipientId==null -> {
@@ -102,7 +107,7 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        AppAuth.getInstance().sendPushToken(token)
+        auth.sendPushToken(token)
         println(token)
     }
 

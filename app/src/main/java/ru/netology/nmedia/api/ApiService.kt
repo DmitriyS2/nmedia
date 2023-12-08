@@ -15,32 +15,32 @@ import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.SignIn
 
-private const val BASE_URL = "http://192.168.1.10:9999/api/slow/"
+//private const val BASE_URL = "http://192.168.1.10:9999/api/slow/"
+//
+//private val logging = HttpLoggingInterceptor().apply {
+//    if (BuildConfig.DEBUG) {
+//        level = HttpLoggingInterceptor.Level.BODY
+//    }
+//}
 
-private val logging = HttpLoggingInterceptor().apply {
-    if (BuildConfig.DEBUG) {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-}
-
-private val okhttp = OkHttpClient.Builder()
-    .addInterceptor { chain ->
-        AppAuth.getInstance().authStateFlow.value.token?.let { token ->
-            val newRequest = chain.request().newBuilder()
-                .addHeader("Authorization", token)
-                .build()
-            return@addInterceptor chain.proceed(newRequest)
-        }
-        chain.proceed(chain.request())
-    }
-    .addInterceptor(logging)
-    .build()
-
-private val retrofit = Retrofit.Builder()
-    .addConverterFactory(GsonConverterFactory.create())
-    .baseUrl(BASE_URL)
-    .client(okhttp)
-    .build()
+//private val okhttp = OkHttpClient.Builder()
+//    .addInterceptor { chain ->
+//        AppAuth.getInstance().authStateFlow.value.token?.let { token ->
+//            val newRequest = chain.request().newBuilder()
+//                .addHeader("Authorization", token)
+//                .build()
+//            return@addInterceptor chain.proceed(newRequest)
+//        }
+//        chain.proceed(chain.request())
+//    }
+//    .addInterceptor(logging)
+//    .build()
+//
+//private val retrofit = Retrofit.Builder()
+//    .addConverterFactory(GsonConverterFactory.create())
+//    .baseUrl(BASE_URL)
+//    .client(okhttp)
+//    .build()
 
 interface ApiService {
     @GET("posts")
@@ -110,12 +110,12 @@ interface ApiService {
 //    fun dislikeById(@Path("id") id: Long): Call<Post>
 //}
 
-object Api {
-    val service: ApiService by lazy {
-        retrofit.create(ApiService::class.java)
-    }
+//object Api {
+//    val service: ApiService by lazy {
+//        retrofit.create(ApiService::class.java)
+//    }
 
 //    val retrofitService: PostsApiService by lazy {
 //        retrofit.create(PostsApiService::class.java)
 //    }
-}
+//}
