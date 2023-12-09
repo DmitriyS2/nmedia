@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentCurrentPhotoBinding
 import ru.netology.nmedia.dto.CounterView
@@ -15,15 +16,16 @@ import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.view.load
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CurrentPhotoFragment : Fragment() {
-
+    
     companion object {
         var Bundle.textArgument: String? by StringArg
     }
 
     private val viewModel: PostViewModel by activityViewModels()
-
     private  val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(

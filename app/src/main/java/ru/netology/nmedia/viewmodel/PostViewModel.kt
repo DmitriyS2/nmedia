@@ -11,12 +11,15 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import androidx.lifecycle.*
+import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
@@ -28,6 +31,7 @@ import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
 import java.util.Locale.filter
+import javax.inject.Inject
 
 
 private val empty = Post(
@@ -50,11 +54,16 @@ private val empty = Post(
 
  val noPhoto = PhotoModel()
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
+@OptIn(ExperimentalCoroutinesApi::class)
+@HiltViewModel
+class PostViewModel @Inject constructor(
+    private val repository: PostRepository,
+    auth: AppAuth
+) : ViewModel() {
 
     //private val repository: PostRepository = PostRepositoryImpl()
-    private val repository: PostRepository =
-        PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
+//    private val repository: PostRepository =
+//        PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
 
 //    val data: LiveData<FeedModel> = repository.data.map(::FeedModel)
 
@@ -62,7 +71,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //        .map(::FeedModel)
 //        .asLiveData(Dispatchers.Default, 100)
 
-    val data: LiveData<FeedModel> = AppAuth.getInstance()
+
+    val data: LiveData<FeedModel> = auth
         .authStateFlow
         .flatMapLatest { (myId, _) ->
             repository.data

@@ -26,8 +26,10 @@ import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 
+@AndroidEntryPoint
 class NewPostFragment : Fragment() {
 
     companion object {

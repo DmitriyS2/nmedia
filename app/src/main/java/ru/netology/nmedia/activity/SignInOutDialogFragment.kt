@@ -5,12 +5,19 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentSigninDialogBinding
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SignInOutDialogFragment(val title: String, val text: String, val icon: Int, val textPosButton:String, val textNegButton:String, val flagSignIn:Boolean = true) : DialogFragment() {
     lateinit var binding: FragmentSigninDialogBinding
+
+    @Inject
+    lateinit var auth: AppAuth
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = FragmentSigninDialogBinding.inflate(layoutInflater)
@@ -27,7 +34,8 @@ class SignInOutDialogFragment(val title: String, val text: String, val icon: Int
                 if(flagSignIn) {
                     findNavController().navigate(R.id.authenticationFragment)
                 } else {
-                    AppAuth.getInstance().removeAuth()
+                    auth.removeAuth()
+                 //   AppAuth.getInstance().removeAuth()
                     findNavController().navigate(R.id.feedFragment)
                 }
 

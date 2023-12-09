@@ -6,12 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.error.ApiError
@@ -19,8 +20,13 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.model.PhotoModel
 import java.io.File
 import java.io.IOException
+import javax.inject.Inject
 
-class SignUpViewModel : ViewModel() {
+@HiltViewModel
+class SignUpViewModel @Inject constructor(
+    private val apiService: ApiService,
+    private val auth: AppAuth
+): ViewModel() {
 
     private val _photo = MutableLiveData(noPhoto)
 
@@ -32,7 +38,7 @@ class SignUpViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = Api.service.registerUser(login, password, name)
+                val response = apiService.registerUser(login, password, name)
                 if (!response.isSuccessful) {
                     throw ApiError(response.code(), response.message())
                 }
@@ -40,7 +46,7 @@ class SignUpViewModel : ViewModel() {
                     response.body() ?: throw ApiError(response.code(), response.message())
                 Log.d("MyLog", "signUp id body=${body.id} token body=${body.token}")
 
-                AppAuth.getInstance().setAuth(body.id, body.token)
+                auth.setAuth(body.id, body.token)
 
             } catch (e: IOException) {
                 throw NetworkError
@@ -78,7 +84,7 @@ class SignUpViewModel : ViewModel() {
 
                 upload(media)
 
-                val response = Api.service.registerWithPhoto(
+                val response = apiService.registerWithPhoto(
                     login.toRequestBody("text/plain".toMediaType()),
                     pass.toRequestBody("text/plain".toMediaType()),
                     name.toRequestBody("text/plain".toMediaType()),
@@ -94,7 +100,7 @@ class SignUpViewModel : ViewModel() {
                     "signUpWithPhoto id body=${body.id} token body=${body.token}"
                 )
 
-                AppAuth.getInstance().setAuth(body.id, body.token)
+                auth.setAuth(body.id, body.token)
 
             } catch (e: IOException) {
                 throw NetworkError
@@ -111,7 +117,7 @@ class SignUpViewModel : ViewModel() {
 //            val media = MultipartBody.Part.createFormData(
 //                "file", upload.file.name, upload.file.asRequestBody()
 //            )
-            val response = Api.service.upload(media)
+            val response = apiService.upload(media)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
