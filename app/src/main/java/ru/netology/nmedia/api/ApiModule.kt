@@ -19,7 +19,6 @@ object ApiServiceModule {
 
         private const val BASE_URL = "http://192.168.1.10:9999/api/slow/"
 
-
     @Provides
     @Singleton
     fun provideLogging():HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
