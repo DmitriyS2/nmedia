@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -9,8 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.filter
+import androidx.paging.insertSeparators
+import androidx.paging.map
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -29,12 +38,14 @@ class CurrentPostFragment : Fragment() {
         var Bundle.textArgument: String? by StringArg
     }
 
-    private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment
-    )
+//    private val viewModel: PostViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment
+//    )
 
+    private val viewModel:PostViewModel by activityViewModels()
     private  val authViewModel: AuthViewModel by activityViewModels()
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,78 +60,100 @@ class CurrentPostFragment : Fragment() {
         val currentId = arguments?.textArgument?.toLong()
 
 
-        viewModel.data.observe(viewLifecycleOwner) { list ->
-            list.posts.find { it.id == currentId }?.let {
-                PostViewHolder(binding.singlePost, object : OnInteractionListener {
-                    override fun like(post: Post) {
-                        if(authViewModel.authenticated) {
-                            viewModel.likeById(post)
-                        } else {
-                            mustSignIn()
+//        viewModel.data.observe(viewLifecycleOwner) { list ->
+//            list.posts.find { it.id == currentId }?.let {
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        viewModel.data.collectLatest {
+
+
+                           it.map { post ->
+                                if (post.id == currentId) {
+
+                                    PostViewHolder(
+                                        binding.singlePost,
+                                        object : OnInteractionListener {
+                                            override fun like(post: Post) {
+                                                if (authViewModel.authenticated) {
+                                                    viewModel.likeById(post)
+                                                } else {
+                                                    mustSignIn()
+                                                }
+                                                //     viewModel.likeById(post)
+                                            }
+
+                                            override fun share(post: Post) {
+                                                viewModel.share(post)
+
+                                                val intent = Intent().apply {
+                                                    action = Intent.ACTION_SEND
+                                                    putExtra(Intent.EXTRA_TEXT, post.content)
+                                                    type = "text/plain"
+                                                }
+                                                val shareIntent =
+                                                    Intent.createChooser(
+                                                        intent,
+                                                        getString(R.string.chooser_share_post)
+                                                    )
+                                                startActivity(shareIntent)
+                                            }
+
+                                            override fun remove(post: Post) {
+                                                viewModel.removeById(post)
+                                                findNavController()
+                                                    .navigate(
+                                                        R.id.action_currentPostFragment_to_feedFragment
+                                                    )
+                                            }
+
+                                            override fun edit(post: Post) {
+                                                viewModel.edit(post)
+
+                                                findNavController()
+                                                    .navigate(R.id.action_currentPostFragment_to_newPostFragment,
+                                                        Bundle().apply {
+                                                            textArg = post.content
+                                                        })
+                                            }
+
+                                            override fun showVideo(post: Post) {
+                                                val intentVideo = Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    Uri.parse(post.videoUrl)
+                                                )
+                                                startActivity(intentVideo)
+                                            }
+
+                                            override fun goToPost(post: Post) {
+
+                                            }
+
+                                            override fun syncPost() {
+
+                                            }
+
+                                            override fun syncOnePost(post: Post) {
+
+                                            }
+
+                                            override fun goToPhoto(id: Long) {
+                                                findNavController()
+                                                    .navigate(R.id.action_currentPostFragment_to_currentPhotoFragment,
+                                                        Bundle().apply {
+                                                            textArg = id.toString()
+                                                        })
+                                            }
+
+
+                             //           }).bind(it) //вызываем метод bind у PostViewHolder
+                                }).bind(post) //вызываем метод bind у PostViewHolder
+                                }
+
+                            }
                         }
-                   //     viewModel.likeById(post)
                     }
-
-                    override fun share(post: Post) {
-                        viewModel.share(post)
-
-                        val intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, post.content)
-                            type = "text/plain"
-                        }
-                        val shareIntent =
-                            Intent.createChooser(intent, getString(R.string.chooser_share_post))
-                        startActivity(shareIntent)
-                    }
-
-                    override fun remove(post: Post) {
-                        viewModel.removeById(post)
-                        findNavController()
-                            .navigate(
-                                R.id.action_currentPostFragment_to_feedFragment
-                            )
-                    }
-
-                    override fun edit(post: Post) {
-                        viewModel.edit(post)
-
-                        findNavController()
-                            .navigate(R.id.action_currentPostFragment_to_newPostFragment,
-                                Bundle().apply {
-                                    textArg = post.content
-                                })
-                    }
-
-                    override fun showVideo(post: Post) {
-                        val intentVideo = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
-                        startActivity(intentVideo)
-                    }
-
-                    override fun goToPost(post: Post) {
-
-                    }
-
-                    override fun syncPost() {
-
-                    }
-
-                    override fun syncOnePost(post: Post) {
-
-                    }
-
-                    override fun goToPhoto(id: Long) {
-                        findNavController()
-                            .navigate(R.id.action_currentPostFragment_to_currentPhotoFragment,
-                                Bundle().apply {
-                                    textArg = id.toString()
-                                })
-                    }
-
-
-                }).bind(it) //вызываем метод bind у PostViewHolder
-            }
-        }
+                }
 
 //        val currentId = arguments?.textArgument?.toLong()
 //
