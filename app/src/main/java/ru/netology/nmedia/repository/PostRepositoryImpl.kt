@@ -1,9 +1,11 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -13,15 +15,15 @@ import kotlinx.coroutines.flow.*
 import ru.netology.nmedia.dto.Post
 import okhttp3.*
 import okhttp3.RequestBody.Companion.asRequestBody
-
 import ru.netology.nmedia.api.ApiService
 import java.io.IOException
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.entity.PostEntity
-import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.enumeration.AttachmentType
 import ru.netology.nmedia.error.ApiError
@@ -45,7 +47,9 @@ import javax.inject.Singleton
 @Singleton
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    appDb: AppDb,
+    postRemoteKeyDao: PostRemoteKeyDao
     ) : PostRepository {
 
   //  override val data = dao.getAll().map(List<PostEntity>::toDto)
@@ -54,10 +58,20 @@ class PostRepositoryImpl @Inject constructor(
 //        .map(List<PostEntity>::toDto)
 //        .flowOn(Dispatchers.Default)
 
-    override val data: Flow<PagingData<Post>> = Pager(
-        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
-        pagingSourceFactory = { PostPagingSource(apiService) },
+//    override val data: Flow<PagingData<Post>> = Pager(
+//        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
+//        pagingSourceFactory = { PostPagingSource(apiService) },
+//    ).flow
+
+    @OptIn(ExperimentalPagingApi::class)
+    override val data:Flow<PagingData<Post>> = Pager(
+        config = PagingConfig(pageSize = 10),
+        remoteMediator = PostRemoteMediator(apiService = apiService, appDb = appDb, dao = dao, postRemoteKeyDao = postRemoteKeyDao),
+        pagingSourceFactory = dao::pagingSource
     ).flow
+        .map { pagingData ->
+        pagingData.map (PostEntity::toDto)
+        }
 
     override suspend fun getAll() {
         try {
@@ -111,12 +125,12 @@ class PostRepositoryImpl @Inject constructor(
                 it.hidden=true
             }
             println("body2 $body")
-            dao.insert(body.toEntity())
-      //      emit(body.size)
-            emit(dao.getHiddenCount())
+       //     dao.insert(body.toEntity())
+            emit(body.size)
+       //     emit(dao.getHiddenCount())
         }
     }
-        .catch { e -> throw AppError.from(e) }
+    //    .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
 
  //   override suspend fun getCount(): Long = dao.count()
@@ -266,6 +280,9 @@ class PostRepositoryImpl @Inject constructor(
     override suspend fun changeHidden() {
         dao.updateHiddenAll()
     }
+
+    override suspend fun getPostById(id: Long)  = dao.getPostById(id).map(PostEntity::toDto)
+
 
     //    override fun getAllAsync(callback: PostRepository.Callback<List<Post>>) {
 //

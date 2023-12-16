@@ -127,7 +127,7 @@ class FeedFragment : Fragment() {
                         })
             }
         })
-        
+
         binding.list.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {

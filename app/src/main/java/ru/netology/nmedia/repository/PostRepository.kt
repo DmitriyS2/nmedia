@@ -25,6 +25,9 @@ interface PostRepository {
     suspend fun syncPost(list: List<Post>)
     suspend fun syncOnePost(post: Post)
     suspend fun changeHidden()
+
+    suspend fun getPostById(id: Long): Flow<Post>
+
  //   suspend fun getCount():Long
   //  suspend fun getHiddenCount():Int
 

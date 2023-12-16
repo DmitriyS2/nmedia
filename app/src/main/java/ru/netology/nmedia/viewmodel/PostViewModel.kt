@@ -201,6 +201,8 @@ class PostViewModel @Inject constructor(
         }
     }
 
+    suspend fun getPostById(id: Long) = repository.getPostById(id)
+
     //    fun save() {
 //        edited.value?.let {
 //            _postCreated.value = Unit
