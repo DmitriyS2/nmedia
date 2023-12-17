@@ -30,22 +30,33 @@ class PostRemoteMediator @Inject constructor(
         try {
             val response = when (loadType) {
                 LoadType.REFRESH -> {
-                    apiService.getLatest(state.config.initialLoadSize)
+                    if (dao.isEmpty()) {
+                        apiService.getLatest(state.config.initialLoadSize)
+                    } else {
+                        val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(
+                            endOfPaginationReached = false
+                        )
+                        apiService.getAfter(id, state.config.pageSize)
+                    }
+
                 }
+
                 LoadType.PREPEND -> {
-                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(
-                        endOfPaginationReached = false
-                    )
-                    val idMaxDb = dao.getMaxId()
-                   Log.d("MyLog", "Prepend. id=$id, idMaxDb =$idMaxDb ")
-                    idMaxDb?.let {
-                        if(idMaxDb==id) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                    } ?: return MediatorResult.Success(endOfPaginationReached = true)
-                    Log.d("MyLog", "getAfter ")
-                    apiService.getAfter(id, state.config.pageSize)
+                    return MediatorResult.Success(endOfPaginationReached = false)
+//                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(
+//                        endOfPaginationReached = false
+//                    )
+//                    val idMaxDb = dao.getMaxId()
+//                   Log.d("MyLog", "Prepend. id=$id, idMaxDb =$idMaxDb ")
+//                    idMaxDb?.let {
+//                        if(idMaxDb==id) {
+//                                return MediatorResult.Success(endOfPaginationReached = true)
+//                            }
+//                    } ?: return MediatorResult.Success(endOfPaginationReached = true)
+//                    Log.d("MyLog", "getAfter ")
+//                    apiService.getAfter(id, state.config.pageSize)
                 }
+
                 LoadType.APPEND -> {
                     val id = postRemoteKeyDao.min() ?: return MediatorResult.Success(
                         endOfPaginationReached = false
@@ -62,42 +73,55 @@ class PostRemoteMediator @Inject constructor(
                 response.message(),
             )
 
-            appDb.withTransaction {
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                    //    postRemoteKeyDao.removeAll()
-                        postRemoteKeyDao.insert(
-                            listOf(
+            if (body.isNotEmpty()) {
+                appDb.withTransaction {
+                    when (loadType) {
+                        LoadType.REFRESH -> {
+                            //    postRemoteKeyDao.removeAll()
+                            if (dao.isEmpty()) {
+                                postRemoteKeyDao.insert(
+                                    listOf(
+                                        PostRemoteKeyEntity(
+                                            type = PostRemoteKeyEntity.KeyType.AFTER,
+                                            id = body.first().id,
+                                        ),
+                                        PostRemoteKeyEntity(
+                                            type = PostRemoteKeyEntity.KeyType.BEFORE,
+                                            id = body.last().id,
+                                        ),
+                                    )
+                                )
+                            } else {
+                                postRemoteKeyDao.insert(
+                                    PostRemoteKeyEntity(
+                                        type = PostRemoteKeyEntity.KeyType.AFTER,
+                                        id = body.first().id,
+                                    )
+                                )
+                            }
+                            //  dao.clear()
+                        }
+
+                        LoadType.PREPEND -> {
+                            postRemoteKeyDao.insert(
                                 PostRemoteKeyEntity(
                                     type = PostRemoteKeyEntity.KeyType.AFTER,
                                     id = body.first().id,
-                                ),
+                                )
+                            )
+                        }
+
+                        LoadType.APPEND -> {
+                            postRemoteKeyDao.insert(
                                 PostRemoteKeyEntity(
                                     type = PostRemoteKeyEntity.KeyType.BEFORE,
                                     id = body.last().id,
-                                ),
+                                )
                             )
-                        )
-                      //  dao.clear()
+                        }
                     }
-                    LoadType.PREPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                type = PostRemoteKeyEntity.KeyType.AFTER,
-                                id = body.first().id,
-                            )
-                        )
-                    }
-                    LoadType.APPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                type = PostRemoteKeyEntity.KeyType.BEFORE,
-                                id = body.last().id,
-                            )
-                        )
-                    }
+                    dao.insert(body.toEntity())
                 }
-                dao.insert(body.toEntity())
             }
             return MediatorResult.Success(endOfPaginationReached = body.isEmpty())
         } catch (e: Exception) {
