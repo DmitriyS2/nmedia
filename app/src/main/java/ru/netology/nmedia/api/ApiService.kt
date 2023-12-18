@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -12,6 +13,7 @@ import retrofit2.Response
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
+import ru.netology.nmedia.dto.NewerCount
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.SignIn
 
@@ -63,6 +65,9 @@ interface ApiService {
 
     @GET("posts/{id}/newer")
     suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
+
+    @GET("posts/{id}/newer-count")
+    suspend fun getNewerCount(@Path("id") id: Long): Response<NewerCount>
 
     @GET("posts/{id}")
     suspend fun getById(@Path("id") id: Long): Response<Post>

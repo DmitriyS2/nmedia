@@ -100,7 +100,6 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                     }
 
                     R.id.signup -> {
-                        // TODO: just hardcode it, implementation must be in homework
                         findNavController(R.id.nav_host_fragment)
                      //       .navigate(R.id.signUpFragment)
                             .navigate(R.id.signUpWithPhotoFragment)
@@ -117,9 +116,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                     else -> false
                 }
         })
-
     }
-
 
     private fun requestNotificationsPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {

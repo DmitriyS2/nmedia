@@ -23,6 +23,7 @@ import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
+import ru.netology.nmedia.dto.NewerCount
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.enumeration.AttachmentType
@@ -52,6 +53,7 @@ class PostRepositoryImpl @Inject constructor(
     postRemoteKeyDao: PostRemoteKeyDao
     ) : PostRepository {
 
+    private val pageSize:Int = 10
   //  override val data = dao.getAll().map(List<PostEntity>::toDto)
 
 //    val data = dao.getAll()
@@ -65,7 +67,7 @@ class PostRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override val data:Flow<PagingData<Post>> = Pager(
-        config = PagingConfig(pageSize = 10),
+        config = PagingConfig(pageSize = pageSize),
         remoteMediator = PostRemoteMediator(apiService = apiService, appDb = appDb, dao = dao, postRemoteKeyDao = postRemoteKeyDao),
         pagingSourceFactory = dao::pagingSource
     ).flow
@@ -84,6 +86,23 @@ class PostRepositoryImpl @Inject constructor(
             dao.insert(body.toEntity())
 
             // dao.isEmpty()
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw MyUnknownError
+        }
+    }
+
+    override suspend fun getLatest() {
+        try {
+            val response = apiService.getLatest(pageSize)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            dao.insert(body.toEntity())
+
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -112,7 +131,7 @@ class PostRepositoryImpl @Inject constructor(
 //        .catch { e -> throw AppError.from(e) }
 //        .flowOn(Dispatchers.Default)
 
-    override fun getNewerCount(): Flow<Int> = flow {
+    override fun getNewer(): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
             val response = apiService.getNewer(dao.getMaxId() ?: 0L)
@@ -132,6 +151,24 @@ class PostRepositoryImpl @Inject constructor(
     }
     //    .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
+
+    override fun getNewerCount(): Flow<NewerCount> =  flow {
+        while (true) {
+            delay(10_000L)
+            val response = apiService.getNewerCount(dao.getMaxId() ?: 0L)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            println("newerCount $body")
+
+            emit(body)
+            //     emit(dao.getHiddenCount())
+        }
+    }
+        //    .catch { e -> throw AppError.from(e) }
+        .flowOn(Dispatchers.Default)
+
 
  //   override suspend fun getCount(): Long = dao.count()
 
