@@ -119,8 +119,16 @@ class PostViewModel @Inject constructor(
         get() = _dataState
 
 
+    val newerCountOld = data.flatMapLatest {
+        repository.getNewer()
+            .catch { e -> e.printStackTrace() }
+    }.asLiveData(Dispatchers.Default)
+
     val newerCount = data.flatMapLatest {
         repository.getNewerCount()
+            .map {
+                it.count
+            }
             .catch { e -> e.printStackTrace() }
     }.asLiveData(Dispatchers.Default)
 
@@ -176,8 +184,8 @@ class PostViewModel @Inject constructor(
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            repository.getAll()
-
+        //    repository.getAll()
+            repository.getLatest()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
@@ -200,6 +208,8 @@ class PostViewModel @Inject constructor(
             // Toast.makeText(getApplication(), "Не удалось обновить посты.\nПопробуйте снова", Toast.LENGTH_SHORT).show()
         }
     }
+
+    suspend fun getPostById(id: Long) = repository.getPostById(id)
 
     //    fun save() {
 //        edited.value?.let {

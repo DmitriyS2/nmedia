@@ -5,6 +5,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
+import ru.netology.nmedia.dto.NewerCount
 import ru.netology.nmedia.dto.Post
 
 interface PostRepository {
@@ -14,7 +15,11 @@ interface PostRepository {
     suspend fun getAll()
   //  fun getNewerCount(id: Long): Flow<Int>
 
-    fun getNewerCount(): Flow<Int>
+    suspend fun getLatest()
+
+    fun getNewerCount(): Flow<NewerCount>
+
+    fun getNewer():Flow<Int>
     suspend fun save(post: Post)
     suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
     suspend fun upload(upload: MediaUpload): Media
@@ -25,6 +30,9 @@ interface PostRepository {
     suspend fun syncPost(list: List<Post>)
     suspend fun syncOnePost(post: Post)
     suspend fun changeHidden()
+
+    suspend fun getPostById(id: Long): Flow<Post>
+
  //   suspend fun getCount():Long
   //  suspend fun getHiddenCount():Int
 

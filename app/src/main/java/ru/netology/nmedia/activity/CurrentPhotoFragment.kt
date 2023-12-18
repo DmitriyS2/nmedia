@@ -30,13 +30,13 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class CurrentPhotoFragment : Fragment() {
-    
+
     companion object {
         var Bundle.textArgument: String? by StringArg
     }
 
     private val viewModel: PostViewModel by activityViewModels()
-    private  val authViewModel: AuthViewModel by activityViewModels()
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,35 +52,35 @@ class CurrentPhotoFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.data.collectLatest {
 
-                    it.map { post->
-                        if (post.id==currentId) {
-                            binding.apply {
-                                currentPhoto.load("http://192.168.1.10:9999/media/${post.attachment?.url}")
+                viewModel.getPostById(currentId ?: 0L).collectLatest { post ->
 
-                                likePhoto.isChecked = post.likedByMe
-                                likePhoto.text = CounterView.createCount(post.likes)
+                    if (post.id == currentId) {
+                        binding.apply {
+                            currentPhoto.load("http://192.168.1.10:9999/media/${post.attachment?.url}")
 
-                                likePhoto.setOnClickListener {
-                                    if(authViewModel.authenticated) {
-                                        viewModel.likeById(post)
-                                    } else {
-                                        mustSignIn()
-                                    }
-                                    //   viewModel.likeById(currentPost)
+                            likePhoto.isChecked = post.likedByMe
+                            likePhoto.text = CounterView.createCount(post.likes)
+
+                            likePhoto.setOnClickListener {
+                                if (authViewModel.authenticated) {
+                                    viewModel.likeById(post)
+                                } else {
+                                    mustSignIn()
                                 }
+                                //   viewModel.likeById(currentPost)
+                            }
 
-                                buttonReturn.setOnClickListener {
-                                    findNavController().navigateUp()
-                                }
+                            buttonReturn.setOnClickListener {
+                                findNavController().navigateUp()
                             }
                         }
                     }
-
                 }
+
             }
         }
+
 
 //        viewModel.data.observe(viewLifecycleOwner) { list ->
 //            list.posts.find { it.id == currentId }?.let { currentPost ->
@@ -135,7 +135,13 @@ class CurrentPhotoFragment : Fragment() {
     }
 
     fun mustSignIn() {
-        val menuDialog = SignInOutDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In","Позже")
+        val menuDialog = SignInOutDialogFragment(
+            "Нужна регистрация",
+            "Для этого действия необходимо войти в систему",
+            R.drawable.info_24,
+            "Sign In",
+            "Позже"
+        )
         val manager = childFragmentManager
         menuDialog.show(manager, "Sign in")
     }

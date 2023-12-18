@@ -127,7 +127,7 @@ class FeedFragment : Fragment() {
                         })
             }
         })
-        
+
         binding.list.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -170,7 +170,7 @@ class FeedFragment : Fragment() {
 //        }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
-            if(state!=0) {
+            if(state!=0L) {
                   binding.newPost.setIconTintResource(R.color.red)
             //    binding.newPost.setBackgroundColor(Color.parseColor("#FF0000"))
                 binding.newPost.isEnabled = true

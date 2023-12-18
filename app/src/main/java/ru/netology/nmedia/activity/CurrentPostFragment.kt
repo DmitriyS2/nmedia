@@ -42,8 +42,8 @@ class CurrentPostFragment : Fragment() {
 //        ownerProducer = ::requireParentFragment
 //    )
 
-    private val viewModel:PostViewModel by activityViewModels()
-    private  val authViewModel: AuthViewModel by activityViewModels()
+    private val viewModel: PostViewModel by activityViewModels()
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     @SuppressLint("SuspiciousIndentation")
     override fun onCreateView(
@@ -63,97 +63,90 @@ class CurrentPostFragment : Fragment() {
 //        viewModel.data.observe(viewLifecycleOwner) { list ->
 //            list.posts.find { it.id == currentId }?.let {
 
-                viewLifecycleOwner.lifecycleScope.launch {
-                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                        viewModel.data.collectLatest {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-
-                           it.map { post ->
-                                if (post.id == currentId) {
-
-                                    PostViewHolder(
-                                        binding.singlePost,
-                                        object : OnInteractionListener {
-                                            override fun like(post: Post) {
-                                                if (authViewModel.authenticated) {
-                                                    viewModel.likeById(post)
-                                                } else {
-                                                    mustSignIn()
-                                                }
-                                                //     viewModel.likeById(post)
-                                            }
-
-                                            override fun share(post: Post) {
-                                                viewModel.share(post)
-
-                                                val intent = Intent().apply {
-                                                    action = Intent.ACTION_SEND
-                                                    putExtra(Intent.EXTRA_TEXT, post.content)
-                                                    type = "text/plain"
-                                                }
-                                                val shareIntent =
-                                                    Intent.createChooser(
-                                                        intent,
-                                                        getString(R.string.chooser_share_post)
-                                                    )
-                                                startActivity(shareIntent)
-                                            }
-
-                                            override fun remove(post: Post) {
-                                                viewModel.removeById(post)
-                                                findNavController()
-                                                    .navigate(
-                                                        R.id.action_currentPostFragment_to_feedFragment
-                                                    )
-                                            }
-
-                                            override fun edit(post: Post) {
-                                                viewModel.edit(post)
-
-                                                findNavController()
-                                                    .navigate(R.id.action_currentPostFragment_to_newPostFragment,
-                                                        Bundle().apply {
-                                                            textArg = post.content
-                                                        })
-                                            }
-
-                                            override fun showVideo(post: Post) {
-                                                val intentVideo = Intent(
-                                                    Intent.ACTION_VIEW,
-                                                    Uri.parse(post.videoUrl)
-                                                )
-                                                startActivity(intentVideo)
-                                            }
-
-                                            override fun goToPost(post: Post) {
-
-                                            }
-
-                                            override fun syncPost() {
-
-                                            }
-
-                                            override fun syncOnePost(post: Post) {
-
-                                            }
-
-                                            override fun goToPhoto(id: Long) {
-                                                findNavController()
-                                                    .navigate(R.id.action_currentPostFragment_to_currentPhotoFragment,
-                                                        Bundle().apply {
-                                                            textArg = id.toString()
-                                                        })
-                                            }
-
-
-                             //           }).bind(it) //вызываем метод bind у PostViewHolder
-                                }).bind(post) //вызываем метод bind у PostViewHolder
+                viewModel.getPostById(currentId ?: 0L).collectLatest { post ->
+                    if (post.id == currentId) {
+                        PostViewHolder(
+                            binding.singlePost,
+                            object : OnInteractionListener {
+                                override fun like(post: Post) {
+                                    if (authViewModel.authenticated) {
+                                        viewModel.likeById(post)
+                                    } else {
+                                        mustSignIn()
+                                    }
+                                    //     viewModel.likeById(post)
                                 }
 
-                            }
-                        }
+                                override fun share(post: Post) {
+                                    viewModel.share(post)
+
+                                    val intent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_TEXT, post.content)
+                                        type = "text/plain"
+                                    }
+                                    val shareIntent =
+                                        Intent.createChooser(
+                                            intent,
+                                            getString(R.string.chooser_share_post)
+                                        )
+                                    startActivity(shareIntent)
+                                }
+
+                                override fun remove(post: Post) {
+                                    viewModel.removeById(post)
+                                    findNavController()
+                                        .navigate(
+                                            R.id.action_currentPostFragment_to_feedFragment
+                                        )
+                                }
+
+                                override fun edit(post: Post) {
+                                    viewModel.edit(post)
+
+                                    findNavController()
+                                        .navigate(R.id.action_currentPostFragment_to_newPostFragment,
+                                            Bundle().apply {
+                                                textArg = post.content
+                                            })
+                                }
+
+                                override fun showVideo(post: Post) {
+                                    val intentVideo = Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(post.videoUrl)
+                                    )
+                                    startActivity(intentVideo)
+                                }
+
+                                override fun goToPost(post: Post) {
+
+                                }
+
+                                override fun syncPost() {
+
+                                }
+
+                                override fun syncOnePost(post: Post) {
+
+                                }
+
+                                override fun goToPhoto(id: Long) {
+                                    findNavController()
+                                        .navigate(R.id.action_currentPostFragment_to_currentPhotoFragment,
+                                            Bundle().apply {
+                                                textArg = id.toString()
+                                            })
+                                }
+                            }).bind(post) //вызываем метод bind у PostViewHolder
                     }
                 }
+            }
+        }
+
 
 //        val currentId = arguments?.textArgument?.toLong()
 //
@@ -238,7 +231,13 @@ class CurrentPostFragment : Fragment() {
     }
 
     fun mustSignIn() {
-        val menuDialog = SignInOutDialogFragment("Нужна регистрация","Для этого действия необходимо войти в систему", R.drawable.info_24, "Sign In", "Позже")
+        val menuDialog = SignInOutDialogFragment(
+            "Нужна регистрация",
+            "Для этого действия необходимо войти в систему",
+            R.drawable.info_24,
+            "Sign In",
+            "Позже"
+        )
         val manager = childFragmentManager
         menuDialog.show(manager, "Sign in")
     }
