@@ -25,6 +25,7 @@ import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostViewHolder
 import ru.netology.nmedia.databinding.FragmentCurrentPostBinding
+import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
@@ -140,6 +141,10 @@ class CurrentPostFragment : Fragment() {
                                             Bundle().apply {
                                                 textArg = id.toString()
                                             })
+                                }
+
+                                override fun onAdClick(ad: Ad) {
+
                                 }
                             }).bind(post) //вызываем метод bind у PostViewHolder
                     }

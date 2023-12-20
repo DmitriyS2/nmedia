@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.switchMap
 import kotlinx.coroutines.flow.transformLatest
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
@@ -105,11 +106,13 @@ class PostViewModel @Inject constructor(
 //            }
 //        }
 
-    val data: Flow<PagingData<Post>> = auth.authStateFlow
+    val data: Flow<PagingData<FeedItem>> = auth.authStateFlow
         .flatMapLatest { (myId, _) ->
             repository.data.map { pagingData ->
-                pagingData.map { post ->
-                    post.copy(ownedByMe = post.authorId == myId)
+                pagingData.map { feedItem ->
+                    if(feedItem is Post) {
+                        feedItem.copy(ownedByMe = feedItem.authorId == myId)
+                    } else feedItem
                 }
             }
         }
