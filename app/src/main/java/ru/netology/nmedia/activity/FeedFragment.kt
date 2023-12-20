@@ -141,9 +141,6 @@ class FeedFragment : Fragment() {
 
      //   binding.list.adapter = adapter
 
-
-
-
         val header = PagingLoadStateAdapter(object :OnInteractionListenerLoadState{
             override fun onRetry() {
                 adapter.retry()

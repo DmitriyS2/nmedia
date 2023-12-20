@@ -16,10 +16,12 @@ import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardAdBinding
 import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.databinding.SeparatorPublishedBinding
 import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.CounterView.createCount
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.SeparatorPublished
 import ru.netology.nmedia.view.load
 
 
@@ -32,11 +34,8 @@ interface OnInteractionListener {
     fun goToPost(post: Post)
     fun syncPost()
     fun syncOnePost(post: Post)
-
     fun goToPhoto(id: Long)
-
     fun onAdClick(ad: Ad)
-
 }
 
 class FeedAdapter(
@@ -48,8 +47,8 @@ class FeedAdapter(
         return when (getItem(position)) {
             is Ad -> R.layout.card_ad
             is Post -> R.layout.card_post
-
-            null -> error("unknown item type")
+            is SeparatorPublished -> R.layout.separator_published
+            else -> error("unknown item type")
         }
     }
 
@@ -62,6 +61,10 @@ class FeedAdapter(
             R.layout.card_ad -> {
                 val binding = CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 AdViewHolder(binding, onInteractionListener)
+            }
+            R.layout.separator_published -> {
+                val binding = SeparatorPublishedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                SeparatorPublishedViewHolder(binding)
             }
 
             else -> error("unknown viewType: $viewType")
@@ -79,8 +82,8 @@ class FeedAdapter(
         when(val item = getItem(position)) {
             is Ad -> (holder as? AdViewHolder)?.bind(item)
             is Post -> (holder as? PostViewHolder)?.bind(item)
-
-            null -> error("unknown item type")
+            is SeparatorPublished -> (holder as? SeparatorPublishedViewHolder)?.bind(item)
+            else -> error("unknown item type")
         }
     }
 }
@@ -100,7 +103,7 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
-            published.text = post.published
+            published.text = post.published.toString()
             content.text = post.content
             like.isChecked = post.likedByMe
             like.text = createCount(post.likes)
@@ -195,7 +198,6 @@ class PostViewHolder(
                     }
                 }.show()
             }
-
             watchCount.text = post.watches.toString()
         }
     }
@@ -213,6 +215,14 @@ class AdViewHolder(
                 onInteractionListener.onAdClick(ad)
             }
         }
+    }
+}
+
+class SeparatorPublishedViewHolder(
+    private val binding: SeparatorPublishedBinding
+):RecyclerView.ViewHolder(binding.root) {
+    fun bind(separatorPublished: SeparatorPublished) {
+        binding.textSeparator.text = separatorPublished.text
     }
 }
 

@@ -80,7 +80,7 @@ interface PostDao {
                 unSaved = :unSaved
                 WHERE id = :id"""
     )
-    suspend fun updateUnSavedByPost(id: Long, author:String, authorAvatar:String, content:String, published:String, unSaved: Boolean)
+    suspend fun updateUnSavedByPost(id: Long, author:String, authorAvatar:String, content:String, published:Long, unSaved: Boolean)
 
     @Query(
         """UPDATE PostEntity 
