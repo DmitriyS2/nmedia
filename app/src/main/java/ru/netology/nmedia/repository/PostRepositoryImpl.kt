@@ -2,11 +2,11 @@ package ru.netology.nmedia.repository
 
 import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.TerminalSeparatorType
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
@@ -37,10 +37,13 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.MyUnknownError
 import ru.netology.nmedia.error.NetworkError
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Period
+import java.time.ZoneId
+import java.time.ZoneId.systemDefault
 import java.time.ZoneOffset
 import java.util.Calendar
 import java.util.Date
@@ -80,7 +83,7 @@ class PostRepositoryImpl @Inject constructor(
 //        pagingSourceFactory = { PostPagingSource(apiService) },
 //    ).flow
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<FeedItem>> = Pager(
         config = PagingConfig(pageSize = pageSize),
@@ -94,15 +97,21 @@ class PostRepositoryImpl @Inject constructor(
     ).flow
         .map { pagingData ->
             pagingData.map(PostEntity::toDto)
-                .insertSeparators { prev, next ->
+                .insertSeparators((TerminalSeparatorType.SOURCE_COMPLETE)) { prev, next ->
                  //   val myTime: Date = Calendar.getInstance().time
                     val dateNow = LocalDateTime.now()
                     val periodYesterday = Period.of(0, 0, 1)
                     val dateYesterday = dateNow.minus(periodYesterday)
                     val dateAfterYesterday = dateYesterday.minus(periodYesterday)
-                 //   val datePrev = LocalDate.ofEpochDay(prev?.published ?: 0L)
-                    val datePrev = LocalDateTime.ofEpochSecond(prev?.published ?: 0L, 0, ZoneOffset.UTC)
-                    val dateNext = LocalDateTime.ofEpochSecond(next?.published ?: 0L, 0, ZoneOffset.UTC)
+
+//                    val datePrev = LocalDateTime.ofEpochSecond(prev?.published ?: 0L, 0, ZoneOffset.UTC)
+//                    val dateNext = LocalDateTime.ofEpochSecond(next?.published ?: 0L, 0, ZoneOffset.UTC)
+                    val datePrev = Instant.ofEpochSecond(prev?.published ?: 0L)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
+                    val dateNext = Instant.ofEpochSecond(next?.published ?: 0L)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
                  //   val dateNext = LocalDate.ofEpochDay(prev?.published ?: 0L)
                     Log.d("MyLog", "До. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
                     //начало
@@ -110,24 +119,25 @@ class PostRepositoryImpl @Inject constructor(
                         //    SeparatorPublished(Random.nextLong(), "now=${myTime},\n prev=${myT}, \n date=$date, \n dateMinus=$dateMinus1, bool=${date>dateMinus1}")
                         Log.d("MyLog", "1. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
                         SeparatorPublished(Random.nextLong(), "Сегодня")
-                     //   return@insertSeparators
+
                     }
                     else if ((datePrev<=dateNow && datePrev > dateYesterday) && (dateNext < dateYesterday && dateNext >= dateAfterYesterday)) {
                         Log.d("MyLog", "2. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
                         SeparatorPublished(Random.nextLong(), "Вчера")
-                    //    return@insertSeparators
+
                     }
                     else if ((datePrev<=dateYesterday && datePrev > dateAfterYesterday) && (dateNext < dateAfterYesterday)) {
                         Log.d("MyLog", "3. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
                         SeparatorPublished(Random.nextLong(), "На прошлой неделе")
-                    //    return@insertSeparators
+
                     }
-                    else {
+                          else {
                         Log.d("MyLog", "null. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
                         null
                     }
 
                 }
+                    //реклама через 5 постов
 //                if(prev?.id?.rem(5)==0L) {
 //                    SeparatorPublished(Random.nextLong(), "Сегодня")
 //                    Ad(Random.nextLong(), "https://netology.ru","figma.jpg")
@@ -147,7 +157,6 @@ class PostRepositoryImpl @Inject constructor(
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
 
-            // dao.isEmpty()
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -352,7 +361,6 @@ class PostRepositoryImpl @Inject constructor(
                 dao.insert(PostEntity.fromDto(post))
                 throw ApiError(response.code(), response.message())
             }
-            // val body = response.body() ?: throw ApiError(response.code(), response.message())
 
         } catch (e: IOException) {
             dao.insert(PostEntity.fromDto(post))
