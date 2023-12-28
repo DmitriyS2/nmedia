@@ -141,25 +141,22 @@ class FeedFragment : Fragment() {
 
      //   binding.list.adapter = adapter
 
-
-
-
         val header = PagingLoadStateAdapter(object :OnInteractionListenerLoadState{
             override fun onRetry() {
                 adapter.retry()
             }
         })
-        adapter.addLoadStateListener { loadStates ->
-            header.loadState = loadStates.prepend
-        }
+//        adapter.addLoadStateListener { loadStates ->
+//            header.loadState = loadStates.prepend
+//        }
         val footer = PagingLoadStateAdapter(object :OnInteractionListenerLoadState{
             override fun onRetry() {
                 adapter.retry()
             }
         })
-        adapter.addLoadStateListener { loadStates ->
-            footer.loadState = loadStates.append
-        }
+//        adapter.addLoadStateListener { loadStates ->
+//            footer.loadState = loadStates.append
+//        }
 
         binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
             header = header,

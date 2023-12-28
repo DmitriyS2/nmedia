@@ -18,7 +18,7 @@ data class Post(
     val author: String,
     val authorAvatar:String,
     val content: String,
-    val published: String,
+    val published: Long,
     val likedByMe: Boolean,
     val likes: Int = 0,
     val shares: Int = 0,
@@ -28,6 +28,11 @@ data class Post(
     var hidden:Boolean = false,
     val attachment: Attachment? = null,
     val ownedByMe: Boolean = false,
+):FeedItem()
+
+data class SeparatorPublished(
+    override val id: Long,
+    val text:String
 ):FeedItem()
 
 //data class LoadStateItem(

@@ -1,10 +1,12 @@
 package ru.netology.nmedia.repository
 
+import android.os.Build
 import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.TerminalSeparatorType
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,7 @@ import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.NewerCount
+import ru.netology.nmedia.dto.SeparatorPublished
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.enumeration.AttachmentType
@@ -34,6 +37,16 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.MyUnknownError
 import ru.netology.nmedia.error.NetworkError
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Period
+import java.time.ZoneId
+import java.time.ZoneId.systemDefault
+import java.time.ZoneOffset
+import java.util.Calendar
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -55,10 +68,11 @@ class PostRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     appDb: AppDb,
     postRemoteKeyDao: PostRemoteKeyDao
-    ) : PostRepository {
+) : PostRepository {
 
-    private val pageSize:Int = 10
-  //  override val data = dao.getAll().map(List<PostEntity>::toDto)
+    private val pageSize: Int = 10
+   // private val
+    //  override val data = dao.getAll().map(List<PostEntity>::toDto)
 
 //    val data = dao.getAll()
 //        .map(List<PostEntity>::toDto)
@@ -69,22 +83,69 @@ class PostRepositoryImpl @Inject constructor(
 //        pagingSourceFactory = { PostPagingSource(apiService) },
 //    ).flow
 
+
     @OptIn(ExperimentalPagingApi::class)
-    override val data:Flow<PagingData<FeedItem>> = Pager(
+    override val data: Flow<PagingData<FeedItem>> = Pager(
         config = PagingConfig(pageSize = pageSize),
-        remoteMediator = PostRemoteMediator(apiService = apiService, appDb = appDb, dao = dao, postRemoteKeyDao = postRemoteKeyDao),
+        remoteMediator = PostRemoteMediator(
+            apiService = apiService,
+            appDb = appDb,
+            dao = dao,
+            postRemoteKeyDao = postRemoteKeyDao
+        ),
         pagingSourceFactory = dao::pagingSource
     ).flow
         .map { pagingData ->
-        pagingData.map (PostEntity::toDto)
-            .insertSeparators { prev, _  ->
-                if(prev?.id?.rem(5)==0L) {
-                    Ad(Random.nextLong(), "https://netology.ru","figma.jpg")
-                } else {
-                    null
+            pagingData.map(PostEntity::toDto)
+                .insertSeparators((TerminalSeparatorType.SOURCE_COMPLETE)) { prev, next ->
+                 //   val myTime: Date = Calendar.getInstance().time
+                    val dateNow = LocalDateTime.now()
+                    val periodYesterday = Period.of(0, 0, 1)
+                    val dateYesterday = dateNow.minus(periodYesterday)
+                    val dateAfterYesterday = dateYesterday.minus(periodYesterday)
+
+//                    val datePrev = LocalDateTime.ofEpochSecond(prev?.published ?: 0L, 0, ZoneOffset.UTC)
+//                    val dateNext = LocalDateTime.ofEpochSecond(next?.published ?: 0L, 0, ZoneOffset.UTC)
+                    val datePrev = Instant.ofEpochSecond(prev?.published ?: 0L)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
+                    val dateNext = Instant.ofEpochSecond(next?.published ?: 0L)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
+                 //   val dateNext = LocalDate.ofEpochDay(prev?.published ?: 0L)
+                    Log.d("MyLog", "До. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
+                    //начало
+                    if (next != null && prev == null) {
+                        //    SeparatorPublished(Random.nextLong(), "now=${myTime},\n prev=${myT}, \n date=$date, \n dateMinus=$dateMinus1, bool=${date>dateMinus1}")
+                        Log.d("MyLog", "1. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
+                        SeparatorPublished(Random.nextLong(), "Сегодня")
+
+                    }
+                    else if ((datePrev<=dateNow && datePrev > dateYesterday) && (dateNext < dateYesterday && dateNext >= dateAfterYesterday)) {
+                        Log.d("MyLog", "2. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
+                        SeparatorPublished(Random.nextLong(), "Вчера")
+
+                    }
+                    else if ((datePrev<=dateYesterday && datePrev > dateAfterYesterday) && (dateNext < dateAfterYesterday)) {
+                        Log.d("MyLog", "3. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
+                        SeparatorPublished(Random.nextLong(), "На прошлой неделе")
+
+                    }
+                          else {
+                        Log.d("MyLog", "null. dateNow=$dateNow, datePrev=$datePrev, dateNext=$dateNext")
+                        null
+                    }
+
                 }
-            }
+                    //реклама через 5 постов
+//                if(prev?.id?.rem(5)==0L) {
+//                    SeparatorPublished(Random.nextLong(), "Сегодня")
+//                    Ad(Random.nextLong(), "https://netology.ru","figma.jpg")
+//                } else {
+//                    null
+//                }
         }
+
 
     override suspend fun getAll() {
         try {
@@ -96,7 +157,6 @@ class PostRepositoryImpl @Inject constructor(
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
 
-            // dao.isEmpty()
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -152,18 +212,18 @@ class PostRepositoryImpl @Inject constructor(
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             println("body1 $body")
             body.onEach {
-                it.hidden=true
+                it.hidden = true
             }
             println("body2 $body")
-       //     dao.insert(body.toEntity())
+            //     dao.insert(body.toEntity())
             emit(body.size)
-       //     emit(dao.getHiddenCount())
+            //     emit(dao.getHiddenCount())
         }
     }
-    //    .catch { e -> throw AppError.from(e) }
+        //    .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
 
-    override fun getNewerCount(): Flow<NewerCount> =  flow {
+    override fun getNewerCount(): Flow<NewerCount> = flow {
         while (true) {
             delay(10_000L)
             val response = apiService.getNewerCount(dao.getMaxId() ?: 0L)
@@ -181,7 +241,7 @@ class PostRepositoryImpl @Inject constructor(
         .flowOn(Dispatchers.Default)
 
 
- //   override suspend fun getCount(): Long = dao.count()
+    //   override suspend fun getCount(): Long = dao.count()
 
     //  suspend fun checkIsEmpty() = dao.isEmpty()
 //    override suspend fun getHiddenCount():Int {
@@ -189,7 +249,7 @@ class PostRepositoryImpl @Inject constructor(
 //    }
 
     override suspend fun save(post: Post) {
-         dao.insert(PostEntity.fromDto(post))
+        dao.insert(PostEntity.fromDto(post))
         try {
             val response = apiService.save(post.copy(unSaved = false))
             if (!response.isSuccessful) {
@@ -197,11 +257,18 @@ class PostRepositoryImpl @Inject constructor(
             }
             val body = response.body() ?: throw ApiError(response.code(), response.message())
 
-        //    getAll()
+            //    getAll()
             println("body.id=${body.id}, body.unSaved=${body.unSaved}, body.hidden=${body.hidden}")
 
-            dao.updateUnSavedByPost(body.id, body.author, body.authorAvatar, body.content, body.published, body.unSaved)
-        //    dao.insert(PostEntity.fromDto(body))
+            dao.updateUnSavedByPost(
+                body.id,
+                body.author,
+                body.authorAvatar,
+                body.content,
+                body.published,
+                body.unSaved
+            )
+            //    dao.insert(PostEntity.fromDto(body))
 
         } catch (e: IOException) {
             throw NetworkError
@@ -214,7 +281,8 @@ class PostRepositoryImpl @Inject constructor(
         try {
             val media = upload(upload)
             // TODO: add support for other types
-            val postWithAttachment = post.copy(attachment = Attachment(media.id, AttachmentType.IMAGE))
+            val postWithAttachment =
+                post.copy(attachment = Attachment(media.id, AttachmentType.IMAGE))
             save(postWithAttachment)
         } catch (e: AppError) {
             throw e
@@ -246,7 +314,8 @@ class PostRepositoryImpl @Inject constructor(
     override suspend fun syncOnePost(post: Post) {
         try {
             Log.d("MyLog", "id post(syncOnePost) = ${post.id}")
-            val response = apiService.save(post.copy(id=0L)) //На сервере уже может быть пост с таким id, поэтому передаём как новый
+            val response =
+                apiService.save(post.copy(id = 0L)) //На сервере уже может быть пост с таким id, поэтому передаём как новый
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -292,7 +361,6 @@ class PostRepositoryImpl @Inject constructor(
                 dao.insert(PostEntity.fromDto(post))
                 throw ApiError(response.code(), response.message())
             }
-            // val body = response.body() ?: throw ApiError(response.code(), response.message())
 
         } catch (e: IOException) {
             dao.insert(PostEntity.fromDto(post))
@@ -329,7 +397,7 @@ class PostRepositoryImpl @Inject constructor(
         dao.updateHiddenAll()
     }
 
-    override suspend fun getPostById(id: Long)  = dao.getPostById(id).map(PostEntity::toDto)
+    override suspend fun getPostById(id: Long) = dao.getPostById(id).map(PostEntity::toDto)
 
 
     //    override fun getAllAsync(callback: PostRepository.Callback<List<Post>>) {
