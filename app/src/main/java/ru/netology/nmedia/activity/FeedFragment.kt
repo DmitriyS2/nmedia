@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -15,20 +14,27 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
-import com.google.android.material.snackbar.Snackbar
+import androidx.paging.PagingSource
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import okhttp3.internal.addHeaderLenient
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.CurrentPostFragment.Companion.textArgument
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
-import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.adapter.FeedAdapter
+import ru.netology.nmedia.adapter.OnInteractionListenerLoadState
+import ru.netology.nmedia.adapter.PagingLoadStateAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class FeedFragment : Fragment() {
@@ -55,7 +61,7 @@ class FeedFragment : Fragment() {
             false
         )
 
-        val adapter = PostsAdapter(object : OnInteractionListener {
+        val adapter = FeedAdapter(object : OnInteractionListener {
 
             override fun like(post: Post) {
                 if(authViewModel.authenticated) {
@@ -126,9 +132,39 @@ class FeedFragment : Fragment() {
                             textArgument = id.toString()
                         })
             }
+
+            override fun onAdClick(ad: Ad) {
+
+            }
+
         })
 
-        binding.list.adapter = adapter
+     //   binding.list.adapter = adapter
+
+
+
+
+        val header = PagingLoadStateAdapter(object :OnInteractionListenerLoadState{
+            override fun onRetry() {
+                adapter.retry()
+            }
+        })
+        adapter.addLoadStateListener { loadStates ->
+            header.loadState = loadStates.prepend
+        }
+        val footer = PagingLoadStateAdapter(object :OnInteractionListenerLoadState{
+            override fun onRetry() {
+                adapter.retry()
+            }
+        })
+        adapter.addLoadStateListener { loadStates ->
+            footer.loadState = loadStates.append
+        }
+
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = header,
+            footer = footer,
+            )
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -136,13 +172,42 @@ class FeedFragment : Fragment() {
             }
         }
 
+        // добавление эффекта свайп
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0, ItemTouchHelper.START or ItemTouchHelper.END
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSwiped(
+                viewHolder: RecyclerView.ViewHolder,
+                direction: Int
+            ) {
+
+                println("DO SOMETHING")
+            }
+        }).attachToRecyclerView(binding.list)
+
+        //добавить линию разграничения между постами
+        binding.list.addItemDecoration(
+            DividerItemDecoration(
+                binding.list.context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 adapter.loadStateFlow.collectLatest { state ->
                     binding.swipeRW.isRefreshing =
-                        state.refresh is LoadState.Loading ||
-                                state.prepend is LoadState.Loading ||
-                                state.append is LoadState.Loading
+                        state.refresh is LoadState.Loading
+                            //    ||  state.prepend is LoadState.Loading ||
+                             //   state.append is LoadState.Loading
                 }
             }
         }
